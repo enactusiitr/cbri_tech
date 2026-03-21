@@ -6,13 +6,9 @@ workflows:
     environment:
       flutter: stable
       java: default
-    triggering:
-      events:
-        - push
+    when:
       branch:
-        patterns:
-          - pattern: main
-            include: true
+        equals: main
     scripts:
       - name: Get Flutter dependencies
         script: flutter pub get
@@ -20,13 +16,6 @@ workflows:
         script: flutter build apk --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-    publishing:
-      email:
-        recipients:
-          - user@example.com
-        notify:
-          success: true
-          failure: true
 
   android-debug:
     name: Android Debug Build
@@ -35,13 +24,9 @@ workflows:
     environment:
       flutter: stable
       java: default
-    triggering:
-      events:
-        - push
+    when:
       branch:
-        patterns:
-          - pattern: develop
-            include: true
+        equals: develop
     scripts:
       - name: Get Flutter dependencies
         script: flutter pub get
@@ -49,10 +34,3 @@ workflows:
         script: flutter build apk --debug
     artifacts:
       - build/app/outputs/flutter-apk/app-debug.apk
-    publishing:
-      email:
-        recipients:
-          - user@example.com
-        notify:
-          success: true
-          failure: true
