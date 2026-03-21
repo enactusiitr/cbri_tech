@@ -6,9 +6,9 @@ workflows:
     environment:
       flutter: stable
       java: default
-    when:
-      branch:
-        equals: main
+    branch:
+      only:
+        - main
     scripts:
       - name: Get Flutter dependencies
         script: flutter pub get
@@ -24,9 +24,9 @@ workflows:
     environment:
       flutter: stable
       java: default
-    when:
-      branch:
-        equals: develop
+    branch:
+      only:
+        - develop
     scripts:
       - name: Get Flutter dependencies
         script: flutter pub get
