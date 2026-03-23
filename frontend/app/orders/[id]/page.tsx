@@ -1,33 +1,51 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useSearchParams } from "next/navigation"
-import { ArrowLeft, Phone, MessageCircle, MapPin, Clock, Store } from "lucide-react"
-import { OrderTimeline } from "@/components/order/order-timeline"
-import { BottomNav } from "@/components/layout/bottom-nav"
-import { useStoreData, useStorePath } from "@/context/StoreContext"
+// ============ COMMENTED OUT: Order Tracking page (disabled per order-flow simplification) ============
+// import { useState, useEffect, use } from "react"
+// import Link from "next/link"
+// import Image from "next/image"
+// import { useSearchParams } from "next/navigation"
+// import { ArrowLeft, Phone, MessageCircle, MapPin, Clock, Store } from "lucide-react"
+// import { OrderTimeline } from "@/components/order/order-timeline"
+// import { BottomNav } from "@/components/layout/bottom-nav"
+// import { useStoreData, useStorePath } from "@/context/StoreContext"
 
-type OrderStatus = "confirmed" | "preparing" | "ready" | "picked-up" | "on-the-way" | "delivered"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useStorePath } from "@/context/StoreContext"
+
+// type OrderStatus = "confirmed" | "preparing" | "ready" | "picked-up" | "on-the-way" | "delivered"
 
 interface OrderPageProps {
   params: Promise<{ id: string }>
 }
 
 export default function OrderTrackingPage({ params }: OrderPageProps) {
-  const { vendors } = useStoreData()
+  const router = useRouter()
   const storePath = useStorePath()
+
+  // Redirect to home since order tracking page is disabled
+  useEffect(() => {
+    router.replace(storePath("/"))
+  }, [router, storePath])
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground font-medium">Redirecting to home...</p>
+    </div>
+  )
+
+  // ============ ORIGINAL ORDER TRACKING PAGE BELOW (COMMENTED OUT) ============
+  /*
+  const { vendors } = useStoreData()
   const { id: orderId } = use(params)
   const searchParams = useSearchParams()
   const isNew = searchParams.get("new") === "true"
 
   const [status, setStatus] = useState<OrderStatus>("confirmed")
 
-  // Simulate order progress for new orders
   useEffect(() => {
     if (!isNew) return
-
     const statusFlow: OrderStatus[] = [
       "confirmed",
       "preparing",
@@ -36,7 +54,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
       "delivered",
     ]
     let currentIndex = 0
-
     const interval = setInterval(() => {
       currentIndex++
       if (currentIndex < statusFlow.length) {
@@ -45,18 +62,15 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
         clearInterval(interval)
       }
     }, 4000)
-
     return () => clearInterval(interval)
   }, [isNew])
 
-  // Mock data
   const vendor = vendors[0]
   if (!vendor) return null
   const estimatedTime = status === "delivered" ? "Delivered" : "15-20 min"
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-background border-b-2 border-foreground">
         <div className="flex items-center gap-4 h-16 px-4 max-w-lg mx-auto">
           <Link
@@ -73,7 +87,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
       </header>
 
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
-        {/* Status Card */}
         <div className="p-4 bg-card rounded-xl border-2 border-foreground poster-shadow">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -96,7 +109,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
             </div>
           </div>
 
-          {/* Map Placeholder */}
           <div className="relative h-40 bg-muted rounded-lg border-2 border-border mb-4 overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -104,13 +116,11 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
                 <p className="text-sm text-muted-foreground">Live tracking map</p>
               </div>
             </div>
-            {/* Animated dot for "on the way" status */}
             {status === "on-the-way" && (
               <div className="absolute top-1/2 left-1/4 w-4 h-4 bg-primary rounded-full animate-ping" />
             )}
           </div>
 
-          {/* Delivery Partner */}
           {(status === "on-the-way" || status === "delivered") && (
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-3">
@@ -134,13 +144,11 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
           )}
         </div>
 
-        {/* Timeline */}
         <div className="p-4 bg-card rounded-xl border-2 border-foreground">
           <h2 className="font-black text-poster mb-4">ORDER STATUS</h2>
           <OrderTimeline status={status} />
         </div>
 
-        {/* Restaurant Info */}
         <div className="p-4 bg-card rounded-xl border-2 border-foreground">
           <h2 className="font-black text-poster mb-3">ORDER FROM</h2>
           <div className="flex items-center gap-3">
@@ -165,7 +173,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
           </div>
         </div>
 
-        {/* Delivery Address */}
         <div className="p-4 bg-card rounded-xl border-2 border-foreground">
           <h2 className="font-black text-poster mb-3">DELIVERY ADDRESS</h2>
           <div className="flex items-start gap-3">
@@ -177,7 +184,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
           </div>
         </div>
 
-        {/* Order Details */}
         <div className="p-4 bg-card rounded-xl border-2 border-foreground">
           <h2 className="font-black text-poster mb-3">ORDER DETAILS</h2>
           <div className="space-y-2 text-sm">
@@ -201,7 +207,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
           </div>
         </div>
 
-        {/* Help Button */}
         <button className="w-full p-4 bg-muted rounded-xl border-2 border-foreground text-center font-bold hover:bg-accent transition-colors">
           Need Help with this Order?
         </button>
@@ -210,4 +215,6 @@ export default function OrderTrackingPage({ params }: OrderPageProps) {
       <BottomNav />
     </div>
   )
+  */
+  // ============ END ORIGINAL ORDER TRACKING PAGE ============
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { vendors, type StoreId } from "@/lib/data"
 import { useCart } from "@/lib/cart-context"
 import { Plus, Minus, ArrowRight, Search, Flame } from "lucide-react"
@@ -63,54 +63,79 @@ export function HomePage({ store }: HomePageProps) {
   const cartItemCount = getItemCount()
 
   const categoryScrollRef = useRef<HTMLDivElement>(null)
+  const isClickScrolling = useRef(false)
+
+  // Auto-scroll the active chip into view within the filter bar
+  const scrollToActiveChip = useCallback((catId: string) => {
+    const tabEl = document.getElementById(`tab-${catId}`)
+    if (tabEl && categoryScrollRef.current) {
+      const container = categoryScrollRef.current
+      const scrollLeft = tabEl.offsetLeft - container.offsetWidth / 2 + tabEl.offsetWidth / 2
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' })
+    }
+  }, [])
 
   const scrollToCategory = (catName: string) => {
-      setActiveCategory(catName.toLowerCase())
-      if (catName.toLowerCase() === "all" || Object.keys(groupedItems).length === 0) {
-          window.scrollTo({ top: 0, behavior: "smooth" })
-          return
-      }
-      const element = document.getElementById(`category-${catName}`)
-      if (element) {
-        // Offset mapping TopBar 64px + SearchBar 55px + TopTabs 55px = 174px
-        const y = element.getBoundingClientRect().top + window.scrollY - 180
-        window.scrollTo({ top: y, behavior: 'smooth' })
-      }
+    const key = catName.toLowerCase()
+    setActiveCategory(key)
+    scrollToActiveChip(key)
+
+    if (key === "all" || Object.keys(groupedItems).length === 0) {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+      return
+    }
+
+    // Guard: suppress IntersectionObserver updates during programmatic scroll
+    isClickScrolling.current = true
+    setTimeout(() => { isClickScrolling.current = false }, 600)
+
+    const element = document.getElementById(`category-${catName}`)
+    if (element) {
+      const y = element.getBoundingClientRect().top + window.scrollY - 180
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }
   }
 
-  // Linear Scroll Spy Tracker mapping UI highlights
+  // IntersectionObserver-based scroll spy
   useEffect(() => {
-    if (searchQuery) return 
+    if (searchQuery) return
 
-    const handleScroll = () => {
-      const categoryElements = Object.keys(groupedItems).map(cat => ({
-        id: cat,
-        el: document.getElementById(`category-${cat}`)
-      }))
-      
-      let currentActive = activeCategory
-      for (const { id, el } of categoryElements) {
-        if (el) {
-          const rect = el.getBoundingClientRect()
-          if (rect.top <= 220 && rect.bottom > 220) {
-            currentActive = id.toLowerCase()
+    const categoryKeys = Object.keys(groupedItems)
+    if (categoryKeys.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isClickScrolling.current) return
+
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const catId = entry.target.id.replace('category-', '')
+            const key = catId.toLowerCase()
+            setActiveCategory(key)
+            scrollToActiveChip(key)
           }
         }
+      },
+      {
+        rootMargin: '-180px 0px -60% 0px',
+        threshold: 0,
       }
-      if (currentActive !== activeCategory) {
-        setActiveCategory(currentActive)
-        const tabEl = document.getElementById(`tab-${currentActive}`)
-        if (tabEl && categoryScrollRef.current) {
-          const container = categoryScrollRef.current
-          const scrollLeft = tabEl.offsetLeft - container.offsetWidth / 2 + tabEl.offsetWidth / 2
-          container.scrollTo({ left: scrollLeft, behavior: 'smooth' })
-        }
+    )
+
+    const elements: Element[] = []
+    for (const cat of categoryKeys) {
+      const el = document.getElementById(`category-${cat}`)
+      if (el) {
+        observer.observe(el)
+        elements.push(el)
       }
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [groupedItems, activeCategory, searchQuery])
+    return () => {
+      for (const el of elements) observer.unobserve(el)
+      observer.disconnect()
+    }
+  }, [groupedItems, searchQuery, scrollToActiveChip])
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -133,20 +158,25 @@ export function HomePage({ store }: HomePageProps) {
           </div>
         </div>
 
-        {/* 3. SCROLL SPY CATEGORY TABS */}
+        {/* 3. SCROLL SPY CATEGORY TABS — polished filter bar */}
         {!searchQuery && (
-          <div className="sticky top-[119px] z-40 bg-background border-b-2 border-border shadow-sm overflow-x-auto no-scrollbar" ref={categoryScrollRef}>
-            <div className="flex px-3 py-2.5 gap-2 w-max">
+          <div className="sticky top-[119px] z-40 bg-background border-b border-border/60 shadow-sm relative">
+            {/* Edge fade overlays */}
+            <div className="filter-bar-fade-left" />
+            <div className="filter-bar-fade-right" />
+
+            {/* Scrollable chip row */}
+            <div className="filter-bar" ref={categoryScrollRef}>
               {Object.keys(groupedItems).map((catName) => (
                 <button
                   key={`tab-${catName}`}
                   id={`tab-${catName.toLowerCase()}`}
                   onClick={() => scrollToCategory(catName)}
-                  className={`whitespace-nowrap px-4 py-1.5 rounded-full border-2 font-bold text-sm transition-all shadow-sm ${
+                  className={
                     activeCategory === catName.toLowerCase()
-                      ? "bg-foreground text-background border-foreground scale-105"
-                      : "bg-card text-foreground border-border hover:border-foreground"
-                  }`}
+                      ? "filter-chip-active"
+                      : "filter-chip"
+                  }
                 >
                   {catName}
                 </button>

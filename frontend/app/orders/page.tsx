@@ -1,12 +1,33 @@
 "use client"
 
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowLeft, ChevronRight, Clock, Package } from "lucide-react"
-import { BottomNav } from "@/components/layout/bottom-nav"
-import { useStoreData, useStorePath } from "@/context/StoreContext"
+// ============ COMMENTED OUT: Your Orders page (disabled per order-flow simplification) ============
+// import Link from "next/link"
+// import Image from "next/image"
+// import { ArrowLeft, ChevronRight, Clock, Package } from "lucide-react"
+// import { BottomNav } from "@/components/layout/bottom-nav"
+// import { useStoreData, useStorePath } from "@/context/StoreContext"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useStorePath } from "@/context/StoreContext"
 
 export default function OrdersPage() {
+  const router = useRouter()
+  const storePath = useStorePath()
+
+  // Redirect to home since orders page is disabled
+  useEffect(() => {
+    router.replace(storePath("/"))
+  }, [router, storePath])
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground font-medium">Redirecting to home...</p>
+    </div>
+  )
+
+  // ============ ORIGINAL YOUR ORDERS PAGE BELOW (COMMENTED OUT) ============
+  /*
   const { vendors, menuItems } = useStoreData()
   const storePath = useStorePath()
   const mockOrders = vendors.slice(0, 3).map((vendor, index) => ({
@@ -23,7 +44,6 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-background border-b-2 border-foreground">
         <div className="flex items-center gap-4 h-16 px-4 max-w-lg mx-auto">
           <Link
@@ -37,7 +57,6 @@ export default function OrdersPage() {
       </header>
 
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
-        {/* Active Orders Section */}
         <section>
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">
             Active Orders
@@ -54,7 +73,6 @@ export default function OrdersPage() {
           </div>
         </section>
 
-        {/* Past Orders Section */}
         <section>
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">
             Past Orders
@@ -66,7 +84,6 @@ export default function OrdersPage() {
                 href={storePath(`/orders/${order.id}`)}
                 className="flex items-center gap-3 p-3 bg-card rounded-xl border-2 border-foreground hover:bg-muted transition-colors"
               >
-                {/* Vendor Image */}
                 <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 border-foreground">
                   <Image
                     src={order.vendor.image}
@@ -75,8 +92,6 @@ export default function OrdersPage() {
                     className="object-cover"
                   />
                 </div>
-
-                {/* Order Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -95,7 +110,6 @@ export default function OrdersPage() {
                       {order.status.toUpperCase()}
                     </span>
                   </div>
-
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Clock className="w-3.5 h-3.5" />
@@ -104,7 +118,6 @@ export default function OrdersPage() {
                     <span className="font-bold">Rs.{order.total}</span>
                   </div>
                 </div>
-
                 <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               </Link>
             ))}
@@ -115,4 +128,6 @@ export default function OrdersPage() {
       <BottomNav />
     </div>
   )
+  */
+  // ============ END ORIGINAL YOUR ORDERS PAGE ============
 }

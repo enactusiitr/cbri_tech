@@ -1,21 +1,39 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { CheckCircle2, ChefHat, Package, Bike, ArrowRight, Home } from "lucide-react"
-import { getVendorById, type Vendor } from "@/lib/data"
+// ============ COMMENTED OUT: Order Success/Confirmed page (disabled per order-flow simplification) ============
+// import { useEffect, useState, Suspense } from "react"
+// import { useParams, useRouter, useSearchParams } from "next/navigation"
+// import Link from "next/link"
+// import { CheckCircle2, ChefHat, Package, Bike, ArrowRight, Home } from "lucide-react"
+// import { getVendorById, type Vendor } from "@/lib/data"
+// import { useStorePath } from "@/context/StoreContext"
+
+import { useEffect, Suspense } from "react"
+import { useRouter } from "next/navigation"
 import { useStorePath } from "@/context/StoreContext"
 
 function SuccessContent() {
-  const params = useParams()
-  const searchParams = useSearchParams()
   const router = useRouter()
   const storePath = useStorePath()
-  
+
+  // Redirect to home since success page is disabled (inline success screen is used instead)
+  useEffect(() => {
+    router.replace(storePath("/"))
+  }, [router, storePath])
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground font-medium">Redirecting to home...</p>
+    </div>
+  )
+
+  // ============ ORIGINAL ORDER SUCCESS PAGE BELOW (COMMENTED OUT) ============
+  /*
+  const params = useParams()
+  const searchParams = useSearchParams()
   const orderId = params.id as string
   const vendorId = searchParams.get("vendorId")
-  
+
   const [vendor, setVendor] = useState<Vendor | null>(null)
   const [address, setAddress] = useState<string>("Loading...")
   const [redirecting, setRedirecting] = useState(false)
@@ -25,7 +43,7 @@ function SuccessContent() {
       const v = getVendorById(vendorId)
       if (v) setVendor(v)
     }
-    
+
     try {
       const saved = localStorage.getItem("checkout_details")
       if (saved) {
@@ -35,20 +53,17 @@ function SuccessContent() {
   }, [vendorId])
 
   useEffect(() => {
-    // 4 second timeout for auto redirect
     const timer = setTimeout(() => {
       setRedirecting(true)
       router.push(storePath(`/orders/${orderId}?new=true`))
     }, 4000)
-    
-    return () => clearTimeout(timer) // Does not interrupt if unmounted early by manual click
+
+    return () => clearTimeout(timer)
   }, [orderId, router, storePath])
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 pb-12 overflow-y-auto">
       <div className="w-full max-w-md space-y-8 animate-in fade-in duration-500">
-        
-        {/* SUCCESS ZONE */}
         <div className="flex flex-col items-center text-center space-y-4 animate-in zoom-in-95 fade-in duration-300">
           <div className="w-24 h-24 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-4 border-foreground poster-shadow-sm">
             <CheckCircle2 className="w-12 h-12" strokeWidth={3} />
@@ -59,7 +74,6 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* ORDER SUMMARY CARD */}
         <div className="bg-card border-2 border-foreground rounded-2xl p-5 poster-shadow-sm space-y-4 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 fill-mode-both">
           <div className="flex justify-between items-start border-b-2 border-border pb-4">
             <div>
@@ -71,14 +85,13 @@ function SuccessContent() {
               <p className="text-xl font-black text-primary">{vendor?.deliveryTime || "15-20 min"}</p>
             </div>
           </div>
-          
+
           <div className="flex flex-col space-y-1">
             <p className="font-bold text-lg">{vendor?.name || "Store"}</p>
             <p className="text-sm text-muted-foreground line-clamp-1 truncate">{address}</p>
           </div>
         </div>
 
-        {/* PROGRESS PREVIEW */}
         <div className="bg-card border-2 border-foreground rounded-2xl p-5 poster-shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500 delay-300 fill-mode-both">
           <h3 className="text-sm font-bold uppercase tracking-wide mb-4">Live Status</h3>
           <div className="space-y-4">
@@ -112,7 +125,6 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* ACTION ZONE */}
         <div className="space-y-3 pt-2 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-500 fill-mode-both">
           <Link
             href={storePath(`/orders/${orderId}?new=true`)}
@@ -128,15 +140,16 @@ function SuccessContent() {
             <Home className="w-5 h-5" /> Back to Home
           </Link>
         </div>
-        
       </div>
     </div>
   )
+  */
+  // ============ END ORIGINAL ORDER SUCCESS PAGE ============
 }
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="font-bold text-primary animate-pulse">Confirming your order...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="font-bold text-primary animate-pulse">Redirecting...</p></div>}>
       <SuccessContent />
     </Suspense>
   )
