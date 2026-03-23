@@ -1,0 +1,189 @@
+// CBRI Inside Campus — Full Canteen Menu
+
+export interface MenuItemData {
+  id: string
+  name: string
+  description: string
+  price: number
+  prices?: { label: string; price: number }[]
+  image: string
+  category: string
+  tags: string[]
+  popular?: boolean
+}
+
+export const menuInsideCategories = [
+  "Drinks", "Burger", "Snacks & Pizza", "Maggi", "Sandwich", "Patties", "Paratha"
+]
+
+export const menuInside: MenuItemData[] = [
+  // --- DRINKS ---
+  {
+    id: "tea", name: "Tea", description: "Hot freshly brewed tea",
+    price: 12, prices: [{ label: "Half", price: 12 }, { label: "Full", price: 20 }],
+    image: "/images/menu/food-items/lemon-ice-tea.webp", category: "Drinks", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "coffee", name: "Coffee", description: "Hot brewed coffee",
+    price: 20, image: "/images/menu/food-items/cup-of-creamy-coffee.webp", category: "Drinks", tags: [],
+  },
+  {
+    id: "cold-coffee", name: "Cold Coffee", description: "Creamy iced coffee",
+    price: 50, image: "/images/menu/food-items/cold-coffee-1.jpg.webp", category: "Drinks", tags: [],
+  },
+  {
+    id: "lassi", name: "Lassi", description: "Sweet cultured buttermilk",
+    price: 45, image: "/images/menu/food-items/lassi.webp", category: "Drinks", tags: ["Healthy"],
+  },
+  {
+    id: "mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
+    price: 55, image: "/images/menu/food-items/mangolassi.webp", category: "Drinks", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "chach", name: "Chach", description: "Spiced Indian buttermilk",
+    price: 15, image: "/images/menu/food-items/chach.webp", category: "Drinks", tags: [],
+  },
+  {
+    id: "fresh-mint-lime-soda", name: "Fresh Mint Lime Soda", description: "Mint infused sparkling limeade",
+    price: 50, image: "/images/menu/food-items/lime-soda.webp", category: "Drinks", tags: [],
+  },
+  {
+    id: "apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
+    price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Drinks", tags: [],
+  },
+
+  // --- BURGER ---
+  {
+    id: "cheeseburger", name: "Cheeseburger", description: "Classic burger stuffed with cheese",
+    price: 60, image: "/images/menu/classic-smash.webp", category: "Burger", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "veg-burger", name: "Veg Burger", description: "Crispy vegetable patty in a sesame bun",
+    price: 45, image: "/images/menu/food-items/veg-burger.webp", category: "Burger", tags: [],
+  },
+
+  // --- SNACKS & PIZZA ---
+  {
+    id: "spring-roll", name: "Spring Roll", description: "Vegetable Stuffing",
+    price: 30, prices: [{ label: "Half", price: 30 }, { label: "Full", price: 60 }],
+    image: "/images/menu/food-items/cigar-roll.webp", category: "Snacks & Pizza", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "french-fries", name: "French Fries", description: "Crispy salted fries",
+    price: 70, image: "/images/menu/french-fries.webp", category: "Snacks & Pizza", tags: [],
+  },
+  {
+    id: "veggie-fingers", name: "Veggie Fingers", description: "6 pcs crunchy fingers",
+    price: 80, image: "/images/menu/food-items/veggie-finger.webp", category: "Snacks & Pizza", tags: [],
+  },
+  {
+    id: "bun-maska", name: "Bun Maska", description: "Classic soft bun with butter",
+    price: 30, image: "/images/menu/garlic-bread.webp", category: "Snacks & Pizza", tags: [],
+  },
+  {
+    id: "momos", name: "Momos", description: "Vegetable Stuffing steamed momos",
+    price: 30, prices: [{ label: "5 pcs", price: 30 }, { label: "10 pcs", price: 60 }],
+    image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy", "Popular"], popular: true,
+  },
+  {
+    id: "kurkure-momos", name: "Kurkure Momos", description: "Crispy outer layer momos",
+    price: 50, prices: [{ label: "5 pcs", price: 50 }, { label: "10 pcs", price: 90 }],
+    image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy"],
+  },
+  {
+    id: "veg-pizza", name: "Veg Pizza", description: "Classic vegetable loaded pizza",
+    price: 90, image: "/images/menu/food-items/veg-pizza.webp", category: "Snacks & Pizza", tags: [],
+  },
+  {
+    id: "cheese-pizza", name: "Cheese Pizza", description: "Oozing melted cheese pizza",
+    price: 150, image: "/images/menu/food-items/cheese-pizza.webp", category: "Snacks & Pizza", tags: ["Popular"], popular: true,
+  },
+
+  // --- MAGGI ---
+  {
+    id: "dry-maggi", name: "Dry Maggi", description: "Classic spiced dry noodles",
+    price: 35, image: "/images/menu/food-items/dry-maggi.webp", category: "Maggi", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "soup-maggi", name: "Soup Maggi", description: "Noodles served in hot spiced broth",
+    price: 35, image: "/images/menu/food-items/soup-maggi.webp", category: "Maggi", tags: [],
+  },
+  {
+    id: "cheese-maggi", name: "Cheese Maggi", description: "Maggi loaded with melted cheese",
+    price: 55, image: "/images/menu/food-items/cheese-maggi.webp", category: "Maggi", tags: [],
+  },
+  {
+    id: "butter-maggi", name: "Butter Maggi", description: "Maggi tossed in rich butter",
+    price: 45, image: "/images/menu/food-items/butter-maggi.webp", category: "Maggi", tags: [],
+  },
+
+  // --- SANDWICH ---
+  {
+    id: "cheese-corn-sandwich", name: "Cheese Corn Sandwich", description: "Grilled sandwich with melting cheese and corn",
+    price: 110, image: "/images/menu/food-items/cheese-corn-sandwich.webp", category: "Sandwich", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "paneer-sandwich", name: "Paneer Sandwich", description: "Spiced paneer filling",
+    price: 110, image: "/images/menu/food-items/paneer-makhani-sandwich.webp", category: "Sandwich", tags: [],
+  },
+  {
+    id: "aloo-sandwich", name: "Aloo Sandwich", description: "Classic spiced potato mash",
+    price: 90, image: "/images/menu/food-items/aloo-sandwich.webp", category: "Sandwich", tags: [],
+  },
+  {
+    id: "paneer-makhani-sandwich", name: "Paneer Makhani Sandwich", description: "Rich paneer makhani stuffed and grilled",
+    price: 180, image: "/images/menu/food-items/paneer-makhani-sandwich.webp", category: "Sandwich", tags: ["Spicy"],
+  },
+
+  // --- PATTIES ---
+  {
+    id: "aloo-patty", name: "Aloo Patty", description: "Crispy golden puff filled with potatoes",
+    price: 20, image: "/images/menu/food-items/aloo-patty.webp", category: "Patties", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "cheese-corn-patty", name: "Cheese Corn Patty", description: "Puff loaded with cheese and corn",
+    price: 35, image: "/images/menu/food-items/cheese-corn-patties.webp", category: "Patties", tags: [],
+  },
+  {
+    id: "paneer-patty", name: "Paneer Patty", description: "Flaky puff filled with spiced paneer",
+    price: 35, image: "/images/menu/food-items/aloo-patty.webp", category: "Patties", tags: [],
+  },
+
+  // --- PARATHA ---
+  {
+    id: "aloo-paratha", name: "Aloo Paratha", description: "Stuffed potato flatbread",
+    price: 40, image: "/images/menu/food-items/aloo-paratha.webp", category: "Paratha", tags: ["Popular"], popular: true,
+  },
+  {
+    id: "aloo-pyaz-paratha", name: "Aloo Pyaz Paratha", description: "Stuffed potato & onion flatbread",
+    price: 40, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "paneer-paratha", name: "Paneer Paratha", description: "Cottage cheese stuffed flatbread",
+    price: 65, image: "/images/menu/food-items/paneer-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "paneer-pyaz-paratha", name: "Paneer Pyaz Paratha", description: "Cottage cheese & onion flatbread",
+    price: 55, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "mix-paratha", name: "Mix Paratha", description: "Mixed veggies stuffed flatbread",
+    price: 55, image: "/images/menu/food-items/mix-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "pyaz-paratha", name: "Pyaz Paratha", description: "Onion stuffed flatbread",
+    price: 45, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "gobi-paratha", name: "Gobi Paratha", description: "Cauliflower stuffed flatbread",
+    price: 45, image: "/images/menu/food-items/gobi-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "gobi-pyaz-paratha", name: "Gobi Pyaz Paratha", description: "Cauliflower & onion flatbread",
+    price: 45, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "plain-paratha", name: "Plain Paratha", description: "Classic layered flatbread",
+    price: 25, image: "/images/menu/food-items/aloo-paratha.webp", category: "Paratha", tags: [],
+  },
+]
