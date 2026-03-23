@@ -147,7 +147,7 @@ class AppTheme {
       ),
 
       // TabBar
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: accentOrange,
         unselectedLabelColor: textSecondary,
         indicatorColor: accentOrange,
@@ -164,7 +164,7 @@ class AppTheme {
       ),
 
       // Card
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: cardDark,
         elevation: 0,
         shape: RoundedRectangleBorder(

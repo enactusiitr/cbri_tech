@@ -1,9 +1,9 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\amogh\OneDrive\Documents\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\amogh\OneDrive\Desktop\cbri_tech\restaurant_dashboard\restaurant_dashboard"
+export "FLUTTER_ROOT=/home/utk/Desktop/UtkKumar/cbri_tech/flutter"
+export "FLUTTER_APPLICATION_PATH=/home/utk/Desktop/UtkKumar/cbri_tech/android_app"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
-export "FLUTTER_TARGET=lib\main.dart"
+export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"
 export "FLUTTER_BUILD_NUMBER=1"

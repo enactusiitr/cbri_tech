@@ -1,0 +1,9 @@
+# General Root Ignore
+.DS_Store
+*.log
+node_modules/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
