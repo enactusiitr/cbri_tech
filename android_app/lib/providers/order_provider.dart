@@ -180,6 +180,8 @@ class OrderProvider extends ChangeNotifier {
 
   /// Called when a new order arrives via socket
   void _onOrderCreated(Order order) {
+    if (order.canteen != 'cbri inside') return;
+    
     log.i('[OrderProvider] 📦 New order received: ${order.id}');
     // Only add if not already in the list (idempotent)
     if (!_orders.any((o) => o.id == order.id)) {
@@ -208,6 +210,16 @@ class OrderProvider extends ChangeNotifier {
   /// Otherwise, the new order is prepended to the list.
   void _upsertOrder(Order order) {
     final index = _orders.indexWhere((o) => o.id == order.id);
+    
+    // If order is completed/rejected, remove it from list
+    if (order.status == OrderStatus.completed || order.status == OrderStatus.rejected) {
+      if (index != -1) {
+        _orders.removeAt(index);
+        notifyListeners();
+      }
+      return;
+    }
+
     if (index != -1) {
       _orders[index] = order;
     } else {

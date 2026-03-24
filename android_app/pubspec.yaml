@@ -34,6 +34,9 @@ dependencies:
   # Shimmer for loading skeleton effect
   shimmer: ^3.0.0
 
+  # Launch phone dialer (tel:) for reject -> call action
+  url_launcher: ^6.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -113,14 +113,15 @@ class ApiService {
   ///
   /// Returns the updated [Order] as returned by the server.
   Future<Order> updateOrderStatus(String orderId, String newStatus) async {
-    final url = Uri.parse('${AppConfig.ordersEndpoint}/$orderId');
-    final body = jsonEncode({'status': newStatus});
+    final url = Uri.parse('${AppConfig.ordersEndpoint}/$orderId/status');
+    final statusForBackend = _mapStatusForBackend(newStatus);
+    final body = jsonEncode({'status': statusForBackend});
 
-    log.i('[ApiService] PATCH $url → status: $newStatus');
+    log.i('[ApiService] PUT $url → status: $statusForBackend');
 
     try {
       final response = await _client
-          .patch(url, headers: _headers, body: body)
+          .put(url, headers: _headers, body: body)
           .timeout(AppConfig.httpTimeout);
 
       log.d('[ApiService] Response ${response.statusCode}');
@@ -161,5 +162,20 @@ class ApiService {
   void dispose() {
     _client.close();
     log.d('[ApiService] HTTP client disposed');
+  }
+
+  String _mapStatusForBackend(String appStatus) {
+    switch (appStatus.toUpperCase()) {
+      case 'NEW':
+        return 'pending';
+      case 'PREPARING':
+        return 'accepted';
+      case 'REJECTED':
+        return 'rejected';
+      case 'COMPLETED':
+        return 'completed';
+      default:
+        return appStatus.toLowerCase();
+    }
   }
 }

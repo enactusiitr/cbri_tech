@@ -17,6 +17,8 @@ List<Order> getMockOrders() {
   return [
     // ── NEW orders ──────────────────────────────────────────────────────
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-001',
       customerName: 'Alice Johnson',
       items: [
@@ -30,6 +32,8 @@ List<Order> getMockOrders() {
     ),
 
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-002',
       customerName: 'Bob Martinez',
       items: [
@@ -43,6 +47,8 @@ List<Order> getMockOrders() {
     ),
 
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-003',
       customerName: 'Carol White',
       items: [
@@ -56,6 +62,8 @@ List<Order> getMockOrders() {
 
     // ── PREPARING orders ─────────────────────────────────────────────────
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-004',
       customerName: 'David Kim',
       items: [
@@ -69,6 +77,8 @@ List<Order> getMockOrders() {
     ),
 
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-005',
       customerName: 'Emma Thompson',
       items: [
@@ -83,6 +93,8 @@ List<Order> getMockOrders() {
 
     // ── READY orders ─────────────────────────────────────────────────────
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-006',
       customerName: 'Frank Davis',
       items: [
@@ -97,6 +109,8 @@ List<Order> getMockOrders() {
 
     // ── COMPLETED orders ─────────────────────────────────────────────────
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-007',
       customerName: 'Grace Lee',
       items: [
@@ -110,6 +124,8 @@ List<Order> getMockOrders() {
     ),
 
     Order(
+      phoneNumber: '555-0123',
+      address: 'Campus Dorm',
       id: 'ord-008',
       customerName: 'Henry Wilson',
       items: [

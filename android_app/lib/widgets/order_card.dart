@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/app_theme.dart';
 import '../models/order_model.dart';
 import '../providers/order_provider.dart';
@@ -18,6 +19,8 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = MediaQuery.of(context).size.width < 380;
+
     // We only watch the updating state for THIS specific order,
     // avoiding unnecessary rebuilds for all other cards.
     final isUpdating = context.select<OrderProvider, bool>(
@@ -29,19 +32,19 @@ class OrderCard extends StatelessWidget {
       // when orders move between tabs
       key: ValueKey(order.id),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isCompact ? 12 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
+            _buildHeader(context, isCompact),
             const SizedBox(height: 12),
             _buildDivider(),
             const SizedBox(height: 12),
-            _buildItemsList(context),
+            _buildItemsList(context, isCompact),
             const SizedBox(height: 12),
             _buildDivider(),
             const SizedBox(height: 12),
-            _buildFooter(context, isUpdating),
+            _buildFooter(context, isUpdating, isCompact),
           ],
         ),
       ),
@@ -50,7 +53,7 @@ class OrderCard extends StatelessWidget {
 
   // ── Header: customer name + status badge + time ──────────────────────
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, bool isCompact) {
     final theme = Theme.of(context);
     final formattedTime = DateFormat('HH:mm').format(order.createdAt);
     final formattedDate = DateFormat('MMM d').format(order.createdAt);
@@ -60,8 +63,8 @@ class OrderCard extends StatelessWidget {
       children: [
         // Order ID circle avatar
         Container(
-          width: 40,
-          height: 40,
+          width: isCompact ? 34 : 40,
+          height: isCompact ? 34 : 40,
           decoration: BoxDecoration(
             color: AppTheme.statusBgColor(order.status.value),
             borderRadius: BorderRadius.circular(10),
@@ -70,14 +73,14 @@ class OrderCard extends StatelessWidget {
             child: Text(
               '#',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isCompact ? 14 : 16,
                 fontWeight: FontWeight.w800,
                 color: AppTheme.statusColor(order.status.value),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isCompact ? 8 : 12),
 
         // Customer name + order ID
         Expanded(
@@ -94,6 +97,22 @@ class OrderCard extends StatelessWidget {
               Text(
                 'ID: ${_shortId(order.id)}',
                 style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.phone, size: isCompact ? 12 : 14, color: AppTheme.textSecondary),
+                  const SizedBox(width: 4),
+                  Text(order.phoneNumber, style: theme.textTheme.bodyMedium),
+                ]
+              ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: isCompact ? 12 : 14, color: AppTheme.textSecondary),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(order.address, style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                ]
               ),
             ],
           ),
@@ -122,7 +141,7 @@ class OrderCard extends StatelessWidget {
 
   // ── Items list ─────────────────────────────────────────────────────────
 
-  Widget _buildItemsList(BuildContext context) {
+  Widget _buildItemsList(BuildContext context, bool isCompact) {
     final theme = Theme.of(context);
 
     return Column(
@@ -137,12 +156,12 @@ class OrderCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         // Render each item in the order
-        ...order.items.map((item) => _buildOrderItemRow(context, item)),
+        ...order.items.map((item) => _buildOrderItemRow(context, item, isCompact)),
       ],
     );
   }
 
-  Widget _buildOrderItemRow(BuildContext context, OrderItem item) {
+  Widget _buildOrderItemRow(BuildContext context, OrderItem item, bool isCompact) {
     final theme = Theme.of(context);
     final itemTotal = item.price * item.quantity;
 
@@ -150,9 +169,12 @@ class OrderCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
+          _buildItemThumbnail(item, isCompact),
+          SizedBox(width: isCompact ? 8 : 10),
+
           // Quantity badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 7, vertical: 2),
             decoration: BoxDecoration(
               color: AppTheme.divider,
               borderRadius: BorderRadius.circular(5),
@@ -166,7 +188,7 @@ class OrderCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: isCompact ? 8 : 10),
 
           // Item name (takes remaining space)
           Expanded(
@@ -180,7 +202,7 @@ class OrderCard extends StatelessWidget {
 
           // Item subtotal
           Text(
-            '\$${itemTotal.toStringAsFixed(2)}',
+            '₹${itemTotal.toStringAsFixed(2)}',
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
             ),
@@ -190,13 +212,35 @@ class OrderCard extends StatelessWidget {
     );
   }
 
+  Widget _buildItemThumbnail(OrderItem item, bool isCompact) {
+    final size = isCompact ? 38.0 : 46.0;
+    final hasImage = item.imageUrl.trim().isNotEmpty;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: size,
+        height: size,
+        color: AppTheme.statusBgColor(order.status.value),
+        child: hasImage
+            ? Image.network(
+                item.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.fastfood_rounded),
+              )
+            : const Icon(Icons.fastfood_rounded),
+      ),
+    );
+  }
+
   // ── Footer: total amount + action button ───────────────────────────────
 
-  Widget _buildFooter(BuildContext context, bool isUpdating) {
+  Widget _buildFooter(BuildContext context, bool isUpdating, bool isCompact) {
     final theme = Theme.of(context);
     final actionConfig = _getActionConfig(order.status);
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Total amount
@@ -209,7 +253,7 @@ class OrderCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              '\$${order.totalAmount.toStringAsFixed(2)}',
+              '₹${order.totalAmount.toStringAsFixed(2)}',
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
@@ -218,9 +262,62 @@ class OrderCard extends StatelessWidget {
           ],
         ),
 
-        // Action button (or null if COMPLETED)
-        if (actionConfig != null)
+        // Action buttons
+        if (order.status == OrderStatus.newOrder)
+          _buildNewOrderActions(context, isUpdating, isCompact)
+        else if (actionConfig != null)
           _buildActionButton(context, actionConfig, isUpdating),
+      ],
+    );
+  }
+
+  Widget _buildNewOrderActions(
+    BuildContext context,
+    bool isUpdating,
+    bool isCompact,
+  ) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.end,
+      children: [
+        OutlinedButton.icon(
+          onPressed: isUpdating ? null : () => _onRejectPressed(context),
+          icon: const Icon(Icons.call_rounded, size: 16),
+          label: const Text('Reject'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red.shade700,
+            side: BorderSide(color: Colors.red.shade300),
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 10 : 12,
+              vertical: 8,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: isUpdating
+              ? null
+              : () => _onActionPressed(context, OrderStatus.preparing),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.accentOrange,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 12 : 16,
+              vertical: 8,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Text(
+            'Accept',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
+        ),
       ],
     );
   }
@@ -281,6 +378,27 @@ class OrderCard extends StatelessWidget {
     context.read<OrderProvider>().updateOrderStatus(order.id, nextStatus);
   }
 
+  Future<void> _onRejectPressed(BuildContext context) async {
+    await _callCustomer(context);
+    if (context.mounted) {
+      context.read<OrderProvider>().updateOrderStatus(order.id, OrderStatus.rejected);
+    }
+  }
+
+  Future<void> _callCustomer(BuildContext context) async {
+    final telUri = Uri(scheme: 'tel', path: order.phoneNumber);
+    if (await canLaunchUrl(telUri)) {
+      await launchUrl(telUri);
+      return;
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open dialer for ${order.phoneNumber}')),
+      );
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────
 
   Widget _buildDivider() {
@@ -305,9 +423,9 @@ class OrderCard extends StatelessWidget {
         );
       case OrderStatus.preparing:
         return _ActionConfig(
-          label: 'Mark Ready',
-          nextStatus: OrderStatus.ready,
-          color: AppTheme.accentAmber,
+          label: 'Done',
+          nextStatus: OrderStatus.completed,
+          color: AppTheme.accentGreen,
         );
       case OrderStatus.ready:
         return _ActionConfig(
@@ -315,6 +433,8 @@ class OrderCard extends StatelessWidget {
           nextStatus: OrderStatus.completed,
           color: AppTheme.accentGreen,
         );
+      case OrderStatus.rejected:
+        return null;
       case OrderStatus.completed:
         return null; // No further actions
     }

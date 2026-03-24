@@ -202,7 +202,7 @@ export function HomePage({ store }: HomePageProps) {
                   const currentPrice = item.prices ? (item.prices.find(p => p.label === (selectedVariants[item.id] || item.prices![0].label))?.price || item.price) : item.price
 
                   return (
-                    <div key={item.id} className="flex gap-2 p-3 bg-card transition-colors hover:bg-muted/50">
+                    <div key={item.id} className="flex relative gap-2 p-3 bg-card transition-colors hover:bg-muted/50 w-full min-w-0 max-w-full overflow-hidden">
                       
                       {/* Left Block: Data Density */}
                       <div className="flex-1 min-w-0 pr-2 pb-1">
@@ -210,7 +210,7 @@ export function HomePage({ store }: HomePageProps) {
                           <span className="w-3.5 h-3.5 rounded border-[1.5px] border-green-600 flex items-center justify-center flex-shrink-0 bg-green-50">
                             <span className="w-1.5 h-1.5 bg-green-600 rounded-full" />
                           </span>
-                          <h4 className="font-bold text-[17px] leading-tight truncate text-foreground tracking-tight">{item.name}</h4>
+                          <h4 className="font-bold text-[17px] leading-tight line-clamp-2 text-foreground tracking-tight flex-1 min-w-0">{item.name}</h4>
                           {isSpicy && <Flame className="w-3.5 h-3.5 text-secondary flex-shrink-0" />}
                         </div>
                         {item.prices ? (
@@ -240,7 +240,7 @@ export function HomePage({ store }: HomePageProps) {
                           <Image src={item.image} alt={item.name} fill className="object-cover" />
                         </div>
                         
-                        <div className="absolute -bottom-1.5 w-[90%] h-[34px] bg-card rounded-lg border-2 border-foreground shadow-sm">
+                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-[90%] h-[34px] bg-card rounded-lg border-2 border-foreground shadow-sm">
                           {!cartItem ? (
                             <button
                               onClick={() => handleAdd(item)}

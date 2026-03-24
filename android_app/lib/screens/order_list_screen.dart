@@ -26,6 +26,9 @@ class OrderListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 380;
+
     // We select only the data this tab needs, avoiding full rebuilds
     // when orders in OTHER tabs change.
     final providerStatus = context.select<OrderProvider, ProviderStatus>(
@@ -65,21 +68,32 @@ class OrderListScreen extends StatelessWidget {
       // Pull-to-refresh triggers a new API fetch
       onRefresh: () => context.read<OrderProvider>().fetchOrders(),
       color: Theme.of(context).colorScheme.primary,
-      backgroundColor: const Color(0xFF252B35),
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: orders.length,
-        // physics ensures RefreshIndicator works even when list is small
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return OrderCard(
-            // ValueKey ensures Flutter correctly identifies each card
-            // during reordering (when an order moves to a different tab)
-            key: ValueKey(order.id),
-            order: order,
-          );
-        },
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(
+              vertical: isCompact ? 6 : 8,
+              horizontal: isCompact ? 8 : 12,
+            ),
+            itemCount: orders.length,
+            // physics ensures RefreshIndicator works even when list is small
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final order = orders[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: OrderCard(
+                  // ValueKey ensures Flutter correctly identifies each card
+                  // during reordering (when an order moves to a different tab)
+                  key: ValueKey(order.id),
+                  order: order,
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

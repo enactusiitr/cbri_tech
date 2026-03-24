@@ -23,6 +23,7 @@ class MockApiService extends ApiService {
   Future<List<Order>> fetchOrders() async {
     return [
       Order(
+        phoneNumber: '123', address: 'Test',
         id: 'test-001',
         customerName: 'Alice Johnson',
         items: [
@@ -34,6 +35,7 @@ class MockApiService extends ApiService {
         createdAt: DateTime.now(),
       ),
       Order(
+        phoneNumber: '123', address: 'Test',
         id: 'test-002',
         customerName: 'Bob Smith',
         items: [
@@ -49,6 +51,7 @@ class MockApiService extends ApiService {
   @override
   Future<Order> updateOrderStatus(String orderId, String newStatus) async {
     return Order(
+        phoneNumber: '123', address: 'Test',
       id: orderId,
       customerName: 'Test Customer',
       items: [],
@@ -156,6 +159,7 @@ void main() {
 
     test('copyWith creates updated order', () {
       final original = Order(
+        phoneNumber: '123', address: 'Test',
         id: '1',
         customerName: 'Alice',
         items: [],
@@ -174,6 +178,7 @@ void main() {
     test('Order equality is based on id', () {
       final now = DateTime.now();
       final a = Order(
+        phoneNumber: '123', address: 'Test',
         id: 'same-id',
         customerName: 'Alice',
         items: [],
@@ -182,6 +187,7 @@ void main() {
         createdAt: now,
       );
       final b = Order(
+        phoneNumber: '123', address: 'Test',
         id: 'same-id',
         customerName: 'Bob', // different name
         items: [],

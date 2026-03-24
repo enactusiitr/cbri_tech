@@ -4,7 +4,7 @@
 // Sets up:
 //   1. Environment variables (flutter_dotenv)
 //   2. The Provider dependency injection tree
-//   3. The MaterialApp with the dark theme
+//   3. The MaterialApp with the light theme
 //   4. The root DashboardScreen
 
 import 'package:flutter/material.dart';
@@ -67,7 +67,7 @@ class RestaurantDashboardApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Restaurant Dashboard',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
         home: const DashboardScreen(),
 
         // Builder wraps the Navigator so we can show SnackBars from the provider

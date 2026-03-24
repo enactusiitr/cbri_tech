@@ -52,16 +52,6 @@ class _DashboardScreenState extends State<DashboardScreen>
       label: 'PREPARING',
       icon: Icons.restaurant_rounded,
     ),
-    _TabConfig(
-      status: OrderStatus.ready,
-      label: 'READY',
-      icon: Icons.check_circle_rounded,
-    ),
-    _TabConfig(
-      status: OrderStatus.completed,
-      label: 'COMPLETED',
-      icon: Icons.history_rounded,
-    ),
   ];
 
   @override

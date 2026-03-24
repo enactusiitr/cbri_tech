@@ -41,7 +41,7 @@ export function MenuItemCard({ item, onSelect, onQuickAdd }: MenuItemCardProps) 
       <div className="flex-1 min-w-0 py-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-poster truncate">{item.name}</h4>
+            <h4 className="font-bold text-poster line-clamp-2">{item.name}</h4>
             <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
               {item.description}
             </p>

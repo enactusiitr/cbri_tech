@@ -7,12 +7,14 @@ import { ArrowLeft, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { CartItemCard } from "@/components/cart/cart-item"
 import { useStorePath } from "@/context/StoreContext"
+import { calculateItemTotal } from "@/lib/data"
 
 export default function CartPage() {
   const router = useRouter()
   const storePath = useStorePath()
   const { items, vendor, getSubtotal, clearCart } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false)
   
   const [form, setForm] = useState({ name: "", phone: "", address: "" })
   const [errors, setErrors] = useState({ name: "", phone: "", address: "" })
@@ -27,7 +29,7 @@ export default function CartPage() {
   }, [])
 
   const subtotal = getSubtotal()
-  const finalTotal = subtotal + 20 + 5 - 25
+  const finalTotal = subtotal + 20 + 0 - 20
 
   const handleCheckout = async () => {
     const newErrors = { name: "", phone: "", address: "" }
@@ -55,31 +57,55 @@ export default function CartPage() {
     setIsProcessing(true)
     
     try {
-      const response = await fetch("http://localhost:8000/api/orders", {
+      const orderPayload = {
+        customer: {
+          name: form.name.trim(),
+          phoneNumber: form.phone.trim(),
+          address: form.address.trim(),
+          canteen: "cbri inside",
+        },
+        items: items.map(item => ({
+          itemName: `${item?.menuItem?.name ?? "Item"}${item?.variant ? ` (${item.variant})` : ""}`,
+          quantity: Number(item?.quantity ?? 1),
+          price: Number(
+            item?.menuItem
+              ? calculateItemTotal(
+                  item.menuItem,
+                  1,
+                  item.selectedCustomizations ?? [],
+                  item.variant,
+                )
+              : 0
+          ),
+          imageUrl: item?.menuItem?.image
+            ? `${window.location.origin}${item.menuItem.image}`
+            : ""
+        })),
+        pricing: {
+          subtotal: Number(subtotal),
+          deliveryFee: 20,
+          platformFee: 0,
+          discount: 20,
+          payableAmount: Number(finalTotal),
+        },
+      }
+
+      const apiUrl = `http://${window.location.hostname}:8000/api/orders`;
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: form.name,
-          phoneNumber: form.phone,
-          address: form.address,
-          items: items.map(item => ({
-            itemName: item.name,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        })
+        body: JSON.stringify(orderPayload)
       });
 
       const data = await response.json();
       
       if (data.success) {
         clearCart();
-        const vendorIdToPass = vendor?.id || "";
-        router.push(`${storePath(`/orders/${data.order._id}/success`)}?vendorId=${vendorIdToPass}`);
+        setIsOrderPlaced(true);
       } else {
-        alert("Failed to place order.");
+        alert(data?.message || "Failed to place order.");
         setIsProcessing(false);
       }
     } catch (error) {
@@ -87,6 +113,24 @@ export default function CartPage() {
       alert("Error connecting to server. Ensure backend is running on port 8000.");
       setIsProcessing(false);
     }
+  }
+
+  if (isOrderPlaced) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white mb-6">
+          <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h1 className="text-3xl font-black text-poster mb-3">Order Received!</h1>
+        <p className="text-muted-foreground mb-8">Your order has been sent to the store successfully.</p>
+        <Link 
+          href={storePath("/")}
+          className="px-8 py-4 bg-primary text-primary-foreground font-bold text-lg rounded-xl border-2 border-foreground poster-shadow hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+        >
+          Back to Home
+        </Link>
+      </div>
+    );
   }
 
   if (items.length === 0) {

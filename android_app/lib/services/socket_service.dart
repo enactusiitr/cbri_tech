@@ -134,14 +134,14 @@ class SocketService {
     // ── Business events ──
 
     /// Fires when a new order is created by a customer on the website
-    socket.on('order_created', (data) {
-      log.i('[SocketService] 📦 order_created event received');
+    socket.on('new_order', (data) {
+      log.i('[SocketService] 📦 new_order event received');
       _handleOrderEvent(data, isCreated: true);
     });
 
     /// Fires when an existing order is updated (e.g. status change)
-    socket.on('order_updated', (data) {
-      log.i('[SocketService] 🔄 order_updated event received');
+    socket.on('order_status_updated', (data) {
+      log.i('[SocketService] 🔄 order_status_updated event received');
       _handleOrderEvent(data, isCreated: false);
     });
   }

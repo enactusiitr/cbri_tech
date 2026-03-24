@@ -12,14 +12,14 @@ class AppTheme {
 
   // ── Brand Colors ──────────────────────────────────────────────────────────
 
-  /// Deep charcoal — primary background for dark surfaces
-  static const Color backgroundDark = Color(0xFF111318);
+  /// Light app background
+  static const Color backgroundDark = Color(0xFFF4F6FA);
 
-  /// Slightly lighter surface for cards and panels
-  static const Color surfaceDark = Color(0xFF1C2028);
+  /// Surface background
+  static const Color surfaceDark = Color(0xFFFFFFFF);
 
   /// Card / elevated surface
-  static const Color cardDark = Color(0xFF252B35);
+  static const Color cardDark = Color(0xFFFFFFFF);
 
   /// Accent orange — for NEW status badge and primary actions
   static const Color accentOrange = Color(0xFFFF6B35);
@@ -34,13 +34,13 @@ class AppTheme {
   static const Color accentCompleted = Color(0xFF6C7A8D);
 
   /// Primary text color
-  static const Color textPrimary = Color(0xFFEFF1F5);
+  static const Color textPrimary = Color(0xFF0F172A);
 
   /// Secondary / muted text
-  static const Color textSecondary = Color(0xFF8B95A8);
+  static const Color textSecondary = Color(0xFF64748B);
 
   /// Divider / border color
-  static const Color divider = Color(0xFF2D3441);
+  static const Color divider = Color(0xFFE2E8F0);
 
   // ── Status Color Mapping ──────────────────────────────────────────────────
 
@@ -53,6 +53,8 @@ class AppTheme {
         return accentAmber;
       case 'READY':
         return accentGreen;
+      case 'REJECTED':
+        return Color(0xFFE74C3C);
       case 'COMPLETED':
         return accentCompleted;
       default:
@@ -67,26 +69,26 @@ class AppTheme {
 
   // ── ThemeData ─────────────────────────────────────────────────────────────
 
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       scaffoldBackgroundColor: backgroundDark,
 
       // Color scheme
-      colorScheme: const ColorScheme.dark(
+      colorScheme: const ColorScheme.light(
         primary: accentOrange,
         secondary: accentAmber,
         surface: surfaceDark,
         error: Color(0xFFE74C3C),
         onPrimary: Colors.white,
-        onSecondary: Colors.black,
+        onSecondary: Colors.white,
         onSurface: textPrimary,
       ),
 
       // Typography — using Google Fonts for a polished look
       textTheme: GoogleFonts.interTextTheme(
-        ThemeData.dark().textTheme,
+        ThemeData.light().textTheme,
       ).copyWith(
         // Large header (screen titles)
         headlineLarge: GoogleFonts.inter(
@@ -166,12 +168,12 @@ class AppTheme {
       // Card
       cardTheme: CardThemeData(
         color: cardDark,
-        elevation: 0,
+        elevation: 0.5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: divider, width: 1),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: EdgeInsets.zero,
       ),
 
       // Divider
@@ -190,4 +192,7 @@ class AppTheme {
       ),
     );
   }
+
+  // Backward-compatible getter for old references.
+  static ThemeData get darkTheme => lightTheme;
 }

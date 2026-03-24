@@ -9,19 +9,22 @@ class OrderItem {
   final String name;
   final int quantity;
   final double price;
+  final String imageUrl;
 
   const OrderItem({
     required this.name,
     required this.quantity,
     required this.price,
+    this.imageUrl = '',
   });
 
   /// Creates an OrderItem from a JSON map (from API or socket payload)
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      name: json['name'] as String? ?? 'Unknown Item',
+      name: json['itemName'] as String? ?? json['name'] as String? ?? 'Unknown Item',
       quantity: (json['quantity'] as num?)?.toInt() ?? 1,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['imageUrl'] as String? ?? json['image'] as String? ?? '',
     );
   }
 
@@ -30,6 +33,7 @@ class OrderItem {
         'name': name,
         'quantity': quantity,
         'price': price,
+        'imageUrl': imageUrl,
       };
 
   @override
@@ -42,6 +46,7 @@ enum OrderStatus {
   newOrder('NEW'),
   preparing('PREPARING'),
   ready('READY'),
+  rejected('REJECTED'),
   completed('COMPLETED');
 
   /// The string value as stored/sent by the backend
@@ -51,6 +56,10 @@ enum OrderStatus {
   /// Parses a backend string into an OrderStatus enum value.
   /// Defaults to [OrderStatus.newOrder] if unrecognized.
   static OrderStatus fromString(String status) {
+    if (status.toLowerCase() == 'pending') return OrderStatus.newOrder;
+    if (status.toLowerCase() == 'accepted') return OrderStatus.preparing;
+    if (status.toLowerCase() == 'rejected') return OrderStatus.rejected;
+
     return OrderStatus.values.firstWhere(
       (e) => e.value == status.toUpperCase(),
       orElse: () => OrderStatus.newOrder,
@@ -62,6 +71,9 @@ enum OrderStatus {
 class Order {
   final String id;
   final String customerName;
+  final String phoneNumber;
+  final String address;
+  final String canteen;
   final List<OrderItem> items;
   final double totalAmount;
   final OrderStatus status;
@@ -70,6 +82,9 @@ class Order {
   const Order({
     required this.id,
     required this.customerName,
+    required this.phoneNumber,
+    required this.address,
+    this.canteen = 'cbri inside',
     required this.items,
     required this.totalAmount,
     required this.status,
@@ -82,8 +97,8 @@ class Order {
     final rawItems = json['items'];
     final List<OrderItem> items = rawItems is List
         ? rawItems
-            .whereType<Map<String, dynamic>>()
-            .map((item) => OrderItem.fromJson(item))
+            .where((item) => item is Map)
+            .map((item) => OrderItem.fromJson(Map<String, dynamic>.from(item as Map)))
             .toList()
         : [];
 
@@ -100,9 +115,12 @@ class Order {
 
     return Order(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      customerName: json['customerName'] as String? ?? 'Unknown Customer',
+      customerName: json['name'] as String? ?? json['customerName'] as String? ?? 'Unknown Customer',
+      phoneNumber: json['phoneNumber'] as String? ?? 'N/A',
+      address: json['address'] as String? ?? 'N/A',
+      canteen: json['canteen'] as String? ?? 'cbri inside',
       items: items,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)),
       status: OrderStatus.fromString(json['status'] as String? ?? 'NEW'),
       createdAt: createdAt,
     );
@@ -112,6 +130,9 @@ class Order {
   Map<String, dynamic> toJson() => {
         'id': id,
         'customerName': customerName,
+        'phoneNumber': phoneNumber,
+        'address': address,
+        'canteen': canteen,
         'items': items.map((i) => i.toJson()).toList(),
         'totalAmount': totalAmount,
         'status': status.value,
@@ -123,6 +144,9 @@ class Order {
   Order copyWith({
     String? id,
     String? customerName,
+    String? phoneNumber,
+    String? address,
+    String? canteen,
     List<OrderItem>? items,
     double? totalAmount,
     OrderStatus? status,
@@ -131,6 +155,9 @@ class Order {
     return Order(
       id: id ?? this.id,
       customerName: customerName ?? this.customerName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      address: address ?? this.address,
+      canteen: canteen ?? this.canteen,
       items: items ?? this.items,
       totalAmount: totalAmount ?? this.totalAmount,
       status: status ?? this.status,

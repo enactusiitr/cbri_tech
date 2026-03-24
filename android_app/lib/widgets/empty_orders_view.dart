@@ -74,6 +74,12 @@ class EmptyOrdersView extends StatelessWidget {
           title: 'Nothing Ready',
           subtitle: 'Orders marked ready for\npickup will appear here.',
         );
+      case OrderStatus.rejected:
+        return _EmptyConfig(
+          icon: Icons.call_end_outlined,
+          title: 'No Rejected Orders',
+          subtitle: 'Rejected orders are removed\nafter customer follow-up.',
+        );
       case OrderStatus.completed:
         return _EmptyConfig(
           icon: Icons.history,
