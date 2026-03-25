@@ -10,6 +10,7 @@
 // - Handles reconnection automatically via socket_io_client options
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../config/app_config.dart';
 import '../models/order_model.dart';
@@ -60,8 +61,9 @@ class SocketService {
     _socket = io.io(
       AppConfig.socketUrl,
       io.OptionBuilder()
-          // Force WebSocket transport (skip long-polling)
-          .setTransports(['websocket'])
+          // Allow both polling and websocket protocols to avoid severe browser blocks
+          // as web browsers block secure WebSockets using self-signed certs.
+          .setTransports(['polling', 'websocket'])
           // Reconnection settings
           .enableReconnection()
           .setReconnectionAttempts(AppConfig.socketReconnectAttempts)
@@ -71,8 +73,14 @@ class SocketService {
           .enableAutoConnect()
           // Disable forceNew so we reuse the connection if possible
           .disableForceNew()
+          // For development: allow self-signed SSL certificates
+          // Remove this in production once domain is mapped
+          .setExtraHeaders({'pragma': 'no-cache', 'cache-control': 'no-cache'})
           .build(),
     );
+    
+    // Configure HttpClient to skip certificate verification for development
+    HttpOverrides.global = _DevelopmentHttpOverrides();
 
     _registerEventHandlers();
   }
@@ -197,5 +205,24 @@ class SocketService {
   void dispose() {
     disconnect();
     log.d('[SocketService] Disposed');
+  }
+}
+
+/// Development-only HTTP overrides to skip SSL certificate verification.
+/// Use ONLY for self-signed certificates during development.
+/// Remove this in production once proper SSL certificates are in place.
+class _DevelopmentHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        // Accept all certificates for development
+        // Log the certificate issue for debugging
+        log.w(
+          '[SSL] Accepting self-signed cert for $host:$port - '
+          'Subject: ${cert.subject}, Issuer: ${cert.issuer}',
+        );
+        return true;
+      };
   }
 }

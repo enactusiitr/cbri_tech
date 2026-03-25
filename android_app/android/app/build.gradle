@@ -43,7 +43,7 @@ android {
     defaultConfig {
         applicationId "com.restaurant.dashboard"
         // socket_io_client requires minSdk 21+
-        minSdkVersion 21
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

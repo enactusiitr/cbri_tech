@@ -79,7 +79,7 @@ export default function CartPage() {
               : 0
           ),
           imageUrl: item?.menuItem?.image
-            ? `${window.location.origin}${item.menuItem.image}`
+            ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.menuItem.image}`
             : ""
         })),
         pricing: {
@@ -91,7 +91,7 @@ export default function CartPage() {
         },
       }
 
-      const apiUrl = `http://${window.location.hostname}:8000/api/orders`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`;
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -109,9 +109,9 @@ export default function CartPage() {
         alert(data?.message || "Failed to place order.");
         setIsProcessing(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error connecting to server. Ensure backend is running on port 8000.");
+      alert(`Error connecting to server (${apiUrl}). Message: ${error.message}`);
       setIsProcessing(false);
     }
   }

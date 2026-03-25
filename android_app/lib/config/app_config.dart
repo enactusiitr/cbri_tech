@@ -25,8 +25,11 @@ class AppConfig {
   /// Full URL for the orders endpoint
   static String get ordersEndpoint => '$apiBaseUrl/orders';
 
-  /// Socket.IO server URL (same as the backend base URL)
-  static String get socketUrl => backendUrl;
+  /// Socket.IO server URL (same as the backend base URL but without path)
+  static String get socketUrl {
+    final uri = Uri.parse(backendUrl);
+    return '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+  }
 
   /// Socket.IO reconnection attempts before giving up
   static const int socketReconnectAttempts = 5;
