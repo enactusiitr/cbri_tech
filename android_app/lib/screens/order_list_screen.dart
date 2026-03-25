@@ -11,8 +11,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/app_config.dart';
 import '../models/order_model.dart';
 import '../providers/order_provider.dart';
+import '../services/socket_service.dart';
 import '../widgets/order_card.dart';
 import '../widgets/order_skeleton.dart';
 import '../widgets/empty_orders_view.dart';
@@ -37,6 +39,15 @@ class OrderListScreen extends StatelessWidget {
     final errorMessage = context.select<OrderProvider, String>(
       (p) => p.errorMessage,
     );
+    final technicalError = context.select<OrderProvider, String>(
+      (p) => p.lastTechnicalError,
+    );
+    final socketState = context.select<OrderProvider, SocketConnectionState>(
+      (p) => p.socketState,
+    );
+    final debugLogs = context.select<OrderProvider, List<String>>(
+      (p) => p.debugLogs,
+    );
 
     // Show loading skeleton during initial fetch
     if (providerStatus == ProviderStatus.loading) {
@@ -46,7 +57,7 @@ class OrderListScreen extends StatelessWidget {
     // Show error view with retry option
     if (providerStatus == ProviderStatus.error) {
       return ErrorView(
-        message: errorMessage,
+        message: technicalError.isNotEmpty ? '$errorMessage\n\n$technicalError' : errorMessage,
         onRetry: () => context.read<OrderProvider>().fetchOrders(),
       );
     }
@@ -58,7 +69,21 @@ class OrderListScreen extends StatelessWidget {
 
     // Show empty state if no orders match this status
     if (orders.isEmpty) {
-      return EmptyOrdersView(status: status);
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            EmptyOrdersView(status: status),
+            if (socketState == SocketConnectionState.error || technicalError.isNotEmpty)
+              _DiagnosticsPanel(
+                socketState: socketState,
+                technicalError: technicalError,
+                logs: debugLogs,
+              ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
     }
 
     // Render the list of order cards.
@@ -94,6 +119,70 @@ class OrderListScreen extends StatelessWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DiagnosticsPanel extends StatelessWidget {
+  final SocketConnectionState socketState;
+  final String technicalError;
+  final List<String> logs;
+
+  const _DiagnosticsPanel({
+    required this.socketState,
+    required this.technicalError,
+    required this.logs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleLogs = logs.take(12).toList();
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Connection Diagnostics',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          SelectableText('Socket state: $socketState'),
+          SelectableText('Backend: ${AppConfig.backendUrl}'),
+          if (technicalError.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Text('Last error:'),
+            SelectableText(
+              technicalError,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ],
+          if (visibleLogs.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const Text('Recent logs:'),
+            const SizedBox(height: 6),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F7F9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SelectableText(
+                visibleLogs.join('\n'),
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

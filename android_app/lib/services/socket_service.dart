@@ -10,7 +10,6 @@
 // - Handles reconnection automatically via socket_io_client options
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../config/app_config.dart';
 import '../models/order_model.dart';
@@ -28,6 +27,7 @@ enum SocketConnectionState {
 /// Callback types for socket events
 typedef OrderCallback = void Function(Order order);
 typedef ConnectionStateCallback = void Function(SocketConnectionState state);
+typedef ErrorMessageCallback = void Function(String message);
 
 class SocketService {
   // The underlying Socket.IO client socket
@@ -37,6 +37,7 @@ class SocketService {
   OrderCallback? onOrderCreated;
   OrderCallback? onOrderUpdated;
   ConnectionStateCallback? onConnectionStateChanged;
+  ErrorMessageCallback? onErrorMessage;
 
   // Current connection state
   SocketConnectionState _connectionState = SocketConnectionState.disconnected;
@@ -61,14 +62,15 @@ class SocketService {
     _socket = io.io(
       AppConfig.socketUrl,
       io.OptionBuilder()
-          // Allow both polling and websocket protocols to avoid severe browser blocks
-          // as web browsers block secure WebSockets using self-signed certs.
-          .setTransports(['polling', 'websocket'])
+          // On Flutter (dart:io), socket_io_client uses websocket transport.
+          // Using 'polling' here leads to connect timeouts on Android.
+          .setTransports(['websocket'])
           // Reconnection settings
           .enableReconnection()
           .setReconnectionAttempts(AppConfig.socketReconnectAttempts)
           .setReconnectionDelay(AppConfig.socketReconnectDelay)
           .setReconnectionDelayMax(10000) // cap at 10s
+          .setPath(AppConfig.socketPath)
           // Auto-connect when initialized
           .enableAutoConnect()
           // Disable forceNew so we reuse the connection if possible
@@ -78,9 +80,6 @@ class SocketService {
           .setExtraHeaders({'pragma': 'no-cache', 'cache-control': 'no-cache'})
           .build(),
     );
-    
-    // Configure HttpClient to skip certificate verification for development
-    HttpOverrides.global = _DevelopmentHttpOverrides();
 
     _registerEventHandlers();
   }
@@ -126,16 +125,19 @@ class SocketService {
 
     socket.onReconnectFailed((_) {
       log.e('[SocketService] ❌ Reconnection failed after max attempts');
+      onErrorMessage?.call('Socket reconnect failed after max attempts');
       _updateState(SocketConnectionState.error);
     });
 
     socket.onError((error) {
       log.e('[SocketService] Socket error: $error');
+      onErrorMessage?.call('Socket error: ${_stringifyError(error)}');
       _updateState(SocketConnectionState.error);
     });
 
     socket.onConnectError((error) {
       log.e('[SocketService] Connection error: $error');
+      onErrorMessage?.call('Socket connect error: ${_stringifyError(error)}');
       _updateState(SocketConnectionState.error);
     });
 
@@ -201,28 +203,20 @@ class SocketService {
     onConnectionStateChanged?.call(newState);
   }
 
+  String _stringifyError(dynamic error) {
+    if (error == null) return 'unknown error';
+    if (error is Map) {
+      final msg = error['msg'];
+      final type = error['type'];
+      final desc = error['desc'];
+      return 'msg=$msg, type=$type, desc=$desc';
+    }
+    return error.toString();
+  }
+
   /// Cleans up resources. Call when the app is closing.
   void dispose() {
     disconnect();
     log.d('[SocketService] Disposed');
-  }
-}
-
-/// Development-only HTTP overrides to skip SSL certificate verification.
-/// Use ONLY for self-signed certificates during development.
-/// Remove this in production once proper SSL certificates are in place.
-class _DevelopmentHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        // Accept all certificates for development
-        // Log the certificate issue for debugging
-        log.w(
-          '[SSL] Accepting self-signed cert for $host:$port - '
-          'Subject: ${cert.subject}, Issuer: ${cert.issuer}',
-        );
-        return true;
-      };
   }
 }

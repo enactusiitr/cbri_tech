@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import '../config/app_config.dart';
 import '../models/order_model.dart';
 import '../utils/logger.dart';
@@ -27,7 +28,30 @@ class ApiService {
   // than creating one per request (connection pooling)
   final http.Client _client;
 
-  ApiService({http.Client? client}) : _client = client ?? http.Client();
+  ApiService({http.Client? client}) : _client = client ?? _createDefaultClient();
+
+  static http.Client _createDefaultClient() {
+    try {
+      final backendUri = Uri.parse(AppConfig.backendUrl);
+      final backendHost = backendUri.host;
+
+      final ioHttpClient = HttpClient()
+        ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+          // Allow cert mismatch only for configured backend host (IP/domain).
+          // This is required while using HTTPS with an IP and a domain cert.
+          if (host == backendHost) {
+            log.w('[ApiService] Accepting certificate for $host:$port');
+            return true;
+          }
+          return false;
+        };
+
+      return IOClient(ioHttpClient);
+    } catch (e) {
+      log.w('[ApiService] Falling back to default HTTP client: $e');
+      return http.Client();
+    }
+  }
 
   // ── Default headers sent with every request ────────────────────────────
 

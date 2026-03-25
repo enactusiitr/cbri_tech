@@ -35,6 +35,8 @@ class OrderProvider extends ChangeNotifier {
 
   ProviderStatus _status = ProviderStatus.idle;
   String _errorMessage = '';
+  String _lastTechnicalError = '';
+  final List<String> _debugLogs = [];
 
   // Track which order IDs are currently being updated (shows loading on card)
   final Set<String> _updatingOrderIds = {};
@@ -45,6 +47,8 @@ class OrderProvider extends ChangeNotifier {
 
   ProviderStatus get status => _status;
   String get errorMessage => _errorMessage;
+  String get lastTechnicalError => _lastTechnicalError;
+  List<String> get debugLogs => List.unmodifiable(_debugLogs);
 
   bool get isLoading => _status == ProviderStatus.loading;
   bool get hasError => _status == ProviderStatus.error;
@@ -84,12 +88,14 @@ class OrderProvider extends ChangeNotifier {
   /// Called once on construction. Sets up socket callbacks and fetches orders.
   void _initialize() {
     log.i('[OrderProvider] Initializing...');
+    _pushLog('Initializing provider for canteen: ${AppConfig.canteenId}');
 
     // Wire socket callbacks — these run on the main isolate, so it's safe
     // to call notifyListeners() from them
     _socketService.onOrderCreated = _onOrderCreated;
     _socketService.onOrderUpdated = _onOrderUpdated;
     _socketService.onConnectionStateChanged = _onSocketStateChanged;
+    _socketService.onErrorMessage = _onSocketErrorMessage;
 
     // Start socket connection
     _socketService.connect();
@@ -104,6 +110,7 @@ class OrderProvider extends ChangeNotifier {
   /// Called on startup and on manual refresh.
   Future<void> fetchOrders() async {
     log.i('[OrderProvider] Fetching orders from API...');
+    _pushLog('API fetch started');
     _setStatus(ProviderStatus.loading);
     _errorMessage = '';
 
@@ -112,14 +119,19 @@ class OrderProvider extends ChangeNotifier {
       _orders = fetchedOrders;
       _setStatus(ProviderStatus.loaded);
       log.i('[OrderProvider] Loaded ${_orders.length} orders');
+      _pushLog('API fetch success: ${_orders.length} orders');
     } on ApiException catch (e) {
       _errorMessage = e.message;
+      _lastTechnicalError = e.toString();
       _setStatus(ProviderStatus.error);
       log.e('[OrderProvider] API fetch failed: ${e.message}');
+      _pushLog('API fetch failed: ${e.message}');
     } catch (e) {
-      _errorMessage = 'An unexpected error occurred. Please try again.';
+      _errorMessage = 'Unexpected error: $e';
+      _lastTechnicalError = e.toString();
       _setStatus(ProviderStatus.error);
       log.e('[OrderProvider] Unexpected error during fetch: $e');
+      _pushLog('Unexpected fetch error: $e');
     }
   }
 
@@ -131,6 +143,7 @@ class OrderProvider extends ChangeNotifier {
   /// Optimistically updates the UI immediately, then reverts on failure.
   Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
     log.i('[OrderProvider] Updating order $orderId → ${newStatus.value}');
+    _pushLog('Update order $orderId -> ${newStatus.value}');
 
     // Mark as updating to show loading state on the specific card
     _updatingOrderIds.add(orderId);
@@ -162,10 +175,14 @@ class OrderProvider extends ChangeNotifier {
         _orders[index] = originalOrder;
       }
       _errorMessage = e.message;
+      _lastTechnicalError = e.toString();
+      _pushLog('Order update failed: ${e.message}');
       // Notify UI of the revert
       notifyListeners();
     } catch (e) {
       log.e('[OrderProvider] Unexpected update error: $e');
+      _lastTechnicalError = e.toString();
+      _pushLog('Unexpected update error: $e');
       if (originalOrder != null && index != -1) {
         _orders[index] = originalOrder;
       }
@@ -187,6 +204,7 @@ class OrderProvider extends ChangeNotifier {
     // Only add if not already in the list (idempotent)
     if (!_orders.any((o) => o.id == order.id)) {
       _orders.insert(0, order); // Insert at top (newest first)
+      _pushLog('Socket new order: ${order.id}');
       notifyListeners();
     }
   }
@@ -200,13 +218,21 @@ class OrderProvider extends ChangeNotifier {
     }
     
     log.i('[OrderProvider] 🔄 Order updated via socket: ${updatedOrder.id}');
+    _pushLog('Socket order updated: ${updatedOrder.id} -> ${updatedOrder.status.value}');
     _upsertOrder(updatedOrder);
   }
 
   /// Called when the socket connection state changes
   void _onSocketStateChanged(SocketConnectionState state) {
     log.d('[OrderProvider] Socket state: $state');
+    _pushLog('Socket state: $state');
     // Notify UI so the connection indicator in the AppBar updates
+    notifyListeners();
+  }
+
+  void _onSocketErrorMessage(String message) {
+    _lastTechnicalError = message;
+    _pushLog(message);
     notifyListeners();
   }
 
@@ -238,6 +264,14 @@ class OrderProvider extends ChangeNotifier {
   void _setStatus(ProviderStatus status) {
     _status = status;
     notifyListeners();
+  }
+
+  void _pushLog(String message) {
+    final timestamp = DateTime.now().toIso8601String();
+    _debugLogs.insert(0, '[$timestamp] $message');
+    if (_debugLogs.length > 80) {
+      _debugLogs.removeLast();
+    }
   }
 
   // ── Cleanup ────────────────────────────────────────────────────────────

@@ -15,6 +15,12 @@ class AppConfig {
   static String get backendUrl =>
       dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000';
 
+  /// Parsed backend URI helper.
+  static Uri get backendUri => Uri.parse(backendUrl);
+
+  /// Backend host used for selective TLS bypass in development.
+  static String get backendHost => backendUri.host;
+
   /// The REST API base path
   static String get apiBasePath =>
       dotenv.env['API_BASE_PATH'] ?? '/api';
@@ -27,9 +33,26 @@ class AppConfig {
 
   /// Socket.IO server URL (same as the backend base URL but without path)
   static String get socketUrl {
-    final uri = Uri.parse(backendUrl);
+    final uri = backendUri;
     return '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
   }
+
+  /// Socket.IO path (can be overridden via SOCKET_PATH in .env).
+  /// Defaults to '/socket.io/' which matches the current backend setup.
+  static String get socketPath {
+    final raw = dotenv.env['SOCKET_PATH'] ?? '/socket.io/';
+    if (raw.isEmpty) return '/socket.io/';
+
+    final withLeadingSlash = raw.startsWith('/') ? raw : '/$raw';
+    return withLeadingSlash.endsWith('/')
+        ? withLeadingSlash
+        : '$withLeadingSlash/';
+  }
+
+  /// Allows temporary certificate bypass when backend is accessed by IP over
+  /// HTTPS and cert CN/SAN points to a domain instead.
+  static bool get allowBadCertificates =>
+      (dotenv.env['ALLOW_BAD_CERTIFICATES'] ?? 'true').toLowerCase() == 'true';
 
   /// Socket.IO reconnection attempts before giving up
   static const int socketReconnectAttempts = 5;

@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 
+import 'config/app_config.dart';
 import 'config/app_theme.dart';
 import 'providers/order_provider.dart';
 import 'screens/dashboard_screen.dart';
@@ -40,9 +42,28 @@ Future<void> main() async {
     log.w('[main] Could not load .env file: $e — using default config');
   }
 
+  // Set TLS override before any API/socket clients are created.
+  if (AppConfig.allowBadCertificates) {
+    HttpOverrides.global = _BackendHttpOverrides();
+    log.w('[main] ALLOW_BAD_CERTIFICATES enabled for ${AppConfig.backendHost}');
+  }
+
   log.i('[main] Starting Restaurant Dashboard...');
 
   runApp(const RestaurantDashboardApp());
+}
+
+class _BackendHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        if (host == AppConfig.backendHost) {
+          return true;
+        }
+        return false;
+      };
+  }
 }
 
 class RestaurantDashboardApp extends StatelessWidget {
