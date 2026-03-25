@@ -41,7 +41,15 @@ class ApiService {
   /// Fetches all orders from the backend.
   /// Returns a list of [Order] objects sorted by createdAt descending.
   Future<List<Order>> fetchOrders() async {
-    final url = Uri.parse(AppConfig.ordersEndpoint);
+    // Append the canteen query parameter so we only get relevant orders
+    final baseUri = Uri.parse(AppConfig.ordersEndpoint);
+    final url = baseUri.replace(
+      queryParameters: {
+        ...baseUri.queryParameters,
+        'canteen': AppConfig.canteenId,
+      },
+    );
+    
     log.i('[ApiService] GET $url');
 
     try {

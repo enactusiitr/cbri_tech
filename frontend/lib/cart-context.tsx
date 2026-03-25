@@ -126,9 +126,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, 0)
   }, [items])
 
+  // Currently Delivery Fee is 0
   const getTotal = useCallback(() => {
     const subtotal = getSubtotal()
-    const deliveryFee = vendor?.deliveryFee || 0
+    const deliveryFee =  0 //|| vendor?.deliveryFee 
     return subtotal + deliveryFee
   }, [getSubtotal, vendor])
 

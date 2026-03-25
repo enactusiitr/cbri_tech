@@ -107,15 +107,6 @@ app.post('/api/orders', async (req, res) => {
     });
     const savedOrder = await newOrder.save();
     
-    console.log(`\n================================`);
-    console.log(`🎉 NEW ORDER RECEIVED! 🎉`);
-    console.log(`Customer: ${name}`);
-    console.log(`Phone: ${phoneNumber}`);
-    console.log(`Address: ${address}`);
-    console.log(`Items: ${normalizedItems.length} item(s)`);
-    console.log(`Total: Rs.${totalAmount.toFixed(2)}`);
-    console.log(`================================\n`);
-    
     // INSTANTLY NOTIFY ANDROID APP: Emit the new order event
     io.emit('new_order', savedOrder);
     
@@ -129,12 +120,14 @@ app.post('/api/orders', async (req, res) => {
 // 2. ANDROID APP: Get all pending/active orders on startup
 app.get('/api/orders', async (req, res) => {
   try {
+    const { canteen } = req.query;
     // Only return orders that are 'pending' or 'accepted' to keep the app clean
-    // Hardcoded for 'cbri inside' canteen as requested
-    const orders = await Order.find({ 
-      status: { $in: ['pending', 'accepted'] },
-      canteen: 'cbri inside'
-    }).sort({ createdAt: -1 });
+    const query = { status: { $in: ['pending', 'accepted'] } };
+    if (canteen) {
+      query.canteen = canteen;
+    }
+    
+    const orders = await Order.find(query).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

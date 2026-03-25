@@ -36,4 +36,9 @@ class AppConfig {
 
   /// HTTP request timeout duration
   static const Duration httpTimeout = Duration(seconds: 15);
+
+  /// Canteen ID string to determine which orders to show in this app build.
+  /// Set using `--dart-define=CANTEEN_ID="cbri inside"` or via .env
+  static String get canteenId =>
+      const String.fromEnvironment('CANTEEN_ID', defaultValue: 'cbri inside');
 }

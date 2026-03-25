@@ -10,6 +10,7 @@
 // Uses ChangeNotifier so Provider can notify listening widgets automatically.
 
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 import '../models/order_model.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
@@ -180,7 +181,7 @@ class OrderProvider extends ChangeNotifier {
 
   /// Called when a new order arrives via socket
   void _onOrderCreated(Order order) {
-    if (order.canteen != 'cbri inside') return;
+    if (order.canteen != AppConfig.canteenId) return;
     
     log.i('[OrderProvider] 📦 New order received: ${order.id}');
     // Only add if not already in the list (idempotent)
@@ -192,6 +193,12 @@ class OrderProvider extends ChangeNotifier {
 
   /// Called when an existing order is updated via socket
   void _onOrderUpdated(Order updatedOrder) {
+    if (updatedOrder.canteen != AppConfig.canteenId && 
+        updatedOrder.status != OrderStatus.rejected && 
+        updatedOrder.status != OrderStatus.completed) {
+      return; 
+    }
+    
     log.i('[OrderProvider] 🔄 Order updated via socket: ${updatedOrder.id}');
     _upsertOrder(updatedOrder);
   }

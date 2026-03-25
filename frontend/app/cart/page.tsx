@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { CartItemCard } from "@/components/cart/cart-item"
-import { useStorePath } from "@/context/StoreContext"
+import { useStore, useStorePath } from "@/context/StoreContext"
 import { calculateItemTotal } from "@/lib/data"
 
 export default function CartPage() {
   const router = useRouter()
+  const { selectedStore } = useStore()
   const storePath = useStorePath()
   const { items, vendor, getSubtotal, clearCart } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -62,7 +63,7 @@ export default function CartPage() {
           name: form.name.trim(),
           phoneNumber: form.phone.trim(),
           address: form.address.trim(),
-          canteen: "cbri inside",
+          canteen: selectedStore === "outside" ? "cbri outside" : "cbri inside",
         },
         items: items.map(item => ({
           itemName: `${item?.menuItem?.name ?? "Item"}${item?.variant ? ` (${item.variant})` : ""}`,
