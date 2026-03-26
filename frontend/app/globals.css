@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Street Food Poster Theme - Campus Bites */
+/* Street Food Poster Theme - Zakaz */
 :root {
   /* Primary: Warm Orange - energetic, appetizing */
   --background: oklch(0.98 0.015 85);

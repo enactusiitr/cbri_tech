@@ -125,7 +125,7 @@ export default function ProfilePage() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Campus Bites v1.0.0
+          Zakaz v1.0.0
         </p>
       </div>
 

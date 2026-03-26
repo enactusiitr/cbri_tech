@@ -1,4 +1,4 @@
-// Campus Bites - Data Layer
+// Zakaz - Data Layer
 
 export interface Vendor {
   id: string

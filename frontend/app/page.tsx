@@ -14,7 +14,7 @@ export default function SelectStorePage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-card rounded-full border-2 border-foreground poster-shadow-sm mb-5">
             <Store className="w-4 h-4 text-primary" />
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">Campus Bites</span>
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">Zakaz</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-poster">SELECT YOUR STORE</h1>
           <p className="text-muted-foreground mt-3 font-medium">

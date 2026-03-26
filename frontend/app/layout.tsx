@@ -10,7 +10,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Campus Bites - Food Delivery for Students",
+  title: "Zakaz - Food Delivery for Students",
   description:
     "Order delicious food from your favorite campus vendors. Fast delivery, great prices, perfect for students. Wok & Roll, Burger Barn, Dosa Express, and more!",
   keywords: [
@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     "dosa",
     "wraps",
   ],
-  authors: [{ name: "Campus Bites" }],
-  creator: "Campus Bites",
-  publisher: "Campus Bites",
+  authors: [{ name: "Zakaz" }],
+  creator: "Zakaz",
+  publisher: "Zakaz",
   generator: "v0.app",
   metadataBase: new URL("https://campusbites.app"),
   alternates: {
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://campusbites.app",
-    siteName: "Campus Bites",
-    title: "Campus Bites - Food Delivery for Students",
+    siteName: "Zakaz",
+    title: "Zakaz - Food Delivery for Students",
     description:
       "Order delicious food from your favorite campus vendors. Fast delivery, great prices, perfect for students.",
     images: [
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Campus Bites - Food Delivery",
+        alt: "Zakaz - Food Delivery",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Campus Bites - Food Delivery for Students",
+    title: "Zakaz - Food Delivery for Students",
     description:
       "Order delicious food from your favorite campus vendors. Fast delivery, great prices.",
     images: ["/og-image.jpg"],

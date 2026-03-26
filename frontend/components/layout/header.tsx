@@ -32,10 +32,10 @@ export function Header() {
         {/* Logo */}
         <Link href={storePath("/")} className="flex items-center gap-2">
           <div className="w-10 h-10 bg-primary rounded-lg border-2 border-foreground poster-shadow-sm flex items-center justify-center">
-            <span className="text-xl font-black text-primary-foreground">CB</span>
+            <span className="text-xl font-black text-primary-foreground">Z</span>
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-black tracking-tight text-poster">CAMPUS BITES</h1>
+            <h1 className="text-lg font-black tracking-tight text-poster">Zakaz</h1>
           </div>
         </Link>
 
