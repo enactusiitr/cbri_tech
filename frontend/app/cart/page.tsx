@@ -40,8 +40,9 @@ export default function CartPage() {
       newErrors.name = "Name must be at least 2 characters"
       isValid = false
     }
-    if (!/^\d{10}$/.test(form.phone)) {
-      newErrors.phone = "Phone must be exactly 10 digits"
+    const phoneDigits = form.phone.replace(/\D/g, '')
+    if (phoneDigits.length < 10) {
+      newErrors.phone = "Phone must have at least 10 digits"
       isValid = false
     }
     if (form.address.trim().length < 5) {
@@ -56,7 +57,11 @@ export default function CartPage() {
     localStorage.setItem("checkout_details", JSON.stringify(form))
 
     setIsProcessing(true)
-    
+
+    const apiUrl = "/api/orders"
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000)
+
     try {
       const orderPayload = {
         customer: {
@@ -91,28 +96,45 @@ export default function CartPage() {
         },
       }
 
-      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`;
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(orderPayload)
-      });
+        body: JSON.stringify(orderPayload),
+        signal: controller.signal
+      })
 
-      const data = await response.json();
+      const rawBody = await response.text()
+      let data: any = null
+      try {
+        data = rawBody ? JSON.parse(rawBody) : null
+      } catch {
+        data = null
+      }
+
+      if (!response.ok) {
+        const message = data?.message || `Request failed with status ${response.status}`
+        alert(message)
+        return
+      }
       
-      if (data.success) {
-        clearCart();
-        setIsOrderPlaced(true);
+      if (data?.success) {
+        clearCart()
+        setIsOrderPlaced(true)
       } else {
-        alert(data?.message || "Failed to place order.");
-        setIsProcessing(false);
+        alert(data?.message || "Failed to place order.")
       }
     } catch (error: any) {
-      console.error(error);
-      alert(`Error connecting to server (${apiUrl}). Message: ${error.message}`);
-      setIsProcessing(false);
+      console.error(error)
+      if (error.name === 'AbortError') {
+        alert("Request timed out. Please check your internet connection and try again.")
+      } else {
+        alert(`Error connecting to server (${apiUrl}). Message: ${error.message}`)
+      }
+    } finally {
+      clearTimeout(timeoutId)
+      setIsProcessing(false)
     }
   }
 
