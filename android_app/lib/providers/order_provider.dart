@@ -10,6 +10,7 @@
 // Uses ChangeNotifier so Provider can notify listening widgets automatically.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../config/app_config.dart';
 import '../models/order_model.dart';
 import '../services/api_service.dart';
@@ -204,6 +205,7 @@ class OrderProvider extends ChangeNotifier {
     // Only add if not already in the list (idempotent)
     if (!_orders.any((o) => o.id == order.id)) {
       _orders.insert(0, order); // Insert at top (newest first)
+      _playNewOrderSound();
       _pushLog('Socket new order: ${order.id}');
       notifyListeners();
     }
@@ -264,6 +266,11 @@ class OrderProvider extends ChangeNotifier {
   void _setStatus(ProviderStatus status) {
     _status = status;
     notifyListeners();
+  }
+
+  void _playNewOrderSound() {
+    // Uses the platform alert sound (no extra assets/dependencies needed).
+    SystemSound.play(SystemSoundType.alert);
   }
 
   void _pushLog(String message) {

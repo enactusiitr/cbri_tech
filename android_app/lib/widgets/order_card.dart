@@ -55,8 +55,10 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, bool isCompact) {
     final theme = Theme.of(context);
-    final formattedTime = DateFormat('HH:mm').format(order.createdAt);
-    final formattedDate = DateFormat('MMM d').format(order.createdAt);
+    // Force display timestamps in IST (+05:30) regardless of device timezone.
+    final createdAtIst = order.createdAt.toUtc().add(const Duration(hours: 5, minutes: 30));
+    final formattedTime = DateFormat('HH:mm').format(createdAtIst);
+    final formattedDate = DateFormat('MMM d').format(createdAtIst);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
