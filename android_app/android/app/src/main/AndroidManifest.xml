@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="Restaurant Dashboard"
+        android:label="Zakaz Shopkeeper"
         android:name="${applicationName}"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <!-- usesCleartextTraffic="true" allows http:// connections in debug.
              Remove or set to false for production if backend uses HTTPS only. -->
