@@ -37,6 +37,12 @@ dependencies:
   # Launch phone dialer (tel:) for reject -> call action
   url_launcher: ^6.3.0
 
+  # Play custom bell sound for new orders
+  audioplayers: ^6.1.0
+
+  # Local notifications for new orders (foreground/background)
+  flutter_local_notifications: ^17.2.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,3 +58,4 @@ flutter:
 
   assets:
     - .env
+    - assets/bell.wav

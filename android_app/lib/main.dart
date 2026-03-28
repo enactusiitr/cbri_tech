@@ -18,6 +18,7 @@ import 'config/app_theme.dart';
 import 'providers/order_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'services/api_service.dart';
+import 'services/notification_service.dart';
 import 'services/socket_service.dart';
 import 'utils/logger.dart';
 
@@ -49,6 +50,8 @@ Future<void> main() async {
   }
 
   log.i('[main] Starting Restaurant Dashboard...');
+
+  await NotificationService.instance.initialize();
 
   runApp(const RestaurantDashboardApp());
 }

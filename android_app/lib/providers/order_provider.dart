@@ -10,10 +10,12 @@
 // Uses ChangeNotifier so Provider can notify listening widgets automatically.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import '../config/app_config.dart';
 import '../models/order_model.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 import '../services/socket_service.dart';
 import '../utils/logger.dart';
 
@@ -41,6 +43,13 @@ class OrderProvider extends ChangeNotifier {
 
   // Track which order IDs are currently being updated (shows loading on card)
   final Set<String> _updatingOrderIds = {};
+  final List<AudioPlayer> _activeBellPlayers = [];
+  final Set<String> _ringingOrderIds = {};
+  final Map<String, Order> _ringingOrdersById = {};
+  final Map<String, int> _ringTickCountByOrderId = {};
+  Timer? _bellLoopTimer;
+  Timer? _fallbackPollTimer;
+  bool _hasCompletedInitialFetch = false;
 
   // ── Getters ────────────────────────────────────────────────────────────
 
@@ -103,6 +112,9 @@ class OrderProvider extends ChangeNotifier {
 
     // Fetch initial order list from REST API
     fetchOrders();
+
+    // Fallback polling ensures alerts still work if socket events are missed.
+    _startFallbackPolling();
   }
 
   // ── API Operations ─────────────────────────────────────────────────────
@@ -117,7 +129,7 @@ class OrderProvider extends ChangeNotifier {
 
     try {
       final fetchedOrders = await _apiService.fetchOrders();
-      _orders = fetchedOrders;
+      _applyFetchedOrders(fetchedOrders);
       _setStatus(ProviderStatus.loaded);
       log.i('[OrderProvider] Loaded ${_orders.length} orders');
       _pushLog('API fetch success: ${_orders.length} orders');
@@ -145,6 +157,10 @@ class OrderProvider extends ChangeNotifier {
   Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
     log.i('[OrderProvider] Updating order $orderId → ${newStatus.value}');
     _pushLog('Update order $orderId -> ${newStatus.value}');
+
+    if (newStatus != OrderStatus.newOrder) {
+      _stopAlertForOrder(orderId);
+    }
 
     // Mark as updating to show loading state on the specific card
     _updatingOrderIds.add(orderId);
@@ -205,7 +221,7 @@ class OrderProvider extends ChangeNotifier {
     // Only add if not already in the list (idempotent)
     if (!_orders.any((o) => o.id == order.id)) {
       _orders.insert(0, order); // Insert at top (newest first)
-      _playNewOrderSound();
+      _startAlertForOrder(order);
       _pushLog('Socket new order: ${order.id}');
       notifyListeners();
     }
@@ -222,6 +238,10 @@ class OrderProvider extends ChangeNotifier {
     log.i('[OrderProvider] 🔄 Order updated via socket: ${updatedOrder.id}');
     _pushLog('Socket order updated: ${updatedOrder.id} -> ${updatedOrder.status.value}');
     _upsertOrder(updatedOrder);
+
+    if (updatedOrder.status != OrderStatus.newOrder) {
+      _stopAlertForOrder(updatedOrder.id);
+    }
   }
 
   /// Called when the socket connection state changes
@@ -248,6 +268,7 @@ class OrderProvider extends ChangeNotifier {
     
     // If order is completed/rejected, remove it from list
     if (order.status == OrderStatus.completed || order.status == OrderStatus.rejected) {
+      _stopAlertForOrder(order.id);
       if (index != -1) {
         _orders.removeAt(index);
         notifyListeners();
@@ -263,14 +284,151 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _applyFetchedOrders(List<Order> fetchedOrders) {
+    final previousById = {for (final o in _orders) o.id: o};
+
+    if (_hasCompletedInitialFetch) {
+      for (final order in fetchedOrders) {
+        final wasKnown = previousById.containsKey(order.id);
+        if (!wasKnown && order.status == OrderStatus.newOrder) {
+          _startAlertForOrder(order);
+        }
+      }
+    }
+
+    _orders = fetchedOrders;
+    _hasCompletedInitialFetch = true;
+
+    final activeFetchedNewIds = fetchedOrders
+        .where((o) => o.status == OrderStatus.newOrder)
+        .map((o) => o.id)
+        .toSet();
+
+    final ringingSnapshot = List<String>.from(_ringingOrderIds);
+    for (final ringingId in ringingSnapshot) {
+      if (!activeFetchedNewIds.contains(ringingId)) {
+        _stopAlertForOrder(ringingId);
+      }
+    }
+  }
+
+  void _startFallbackPolling() {
+    _fallbackPollTimer?.cancel();
+    _fallbackPollTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      unawaited(_syncOrdersSilently());
+    });
+  }
+
+  Future<void> _syncOrdersSilently() async {
+    try {
+      final fetchedOrders = await _apiService.fetchOrders();
+      _applyFetchedOrders(fetchedOrders);
+      notifyListeners();
+    } catch (_) {
+      // Ignore transient polling failures; socket and manual refresh remain active.
+    }
+  }
+
   void _setStatus(ProviderStatus status) {
     _status = status;
     notifyListeners();
   }
 
-  void _playNewOrderSound() {
-    // Uses the platform alert sound (no extra assets/dependencies needed).
-    SystemSound.play(SystemSoundType.alert);
+  Future<void> _playNewOrderSound() async {
+    final player = AudioPlayer();
+    try {
+      await player.setReleaseMode(ReleaseMode.stop);
+      await player.setPlayerMode(PlayerMode.lowLatency);
+      await player.setAudioContext(
+        AudioContext(
+          android: AudioContextAndroid(
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.notificationRingtone,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+        ),
+      );
+
+      _activeBellPlayers.add(player);
+
+      player.play(AssetSource('bell.wav'), volume: 1.0).then((_) {
+        log.i('[OrderProvider] bell.wav played');
+        _pushLog('Played bell.wav for new order');
+      }).catchError((error) {
+        log.e('[OrderProvider] bell.wav playback failed: $error');
+        _lastTechnicalError = 'Bell playback failed: $error';
+        _pushLog(_lastTechnicalError);
+        notifyListeners();
+      });
+
+      Future<void>.delayed(const Duration(seconds: 2), () async {
+        await player.dispose();
+        _activeBellPlayers.remove(player);
+      });
+    } catch (error) {
+      log.e('[OrderProvider] bell.wav playback failed: $error');
+      _lastTechnicalError = 'Bell playback failed: $error';
+      _pushLog(_lastTechnicalError);
+      notifyListeners();
+      await player.dispose();
+      _activeBellPlayers.remove(player);
+    }
+  }
+
+  void _startAlertForOrder(Order order) {
+    _ringingOrderIds.add(order.id);
+    _ringingOrdersById[order.id] = order;
+    _ringTickCountByOrderId.putIfAbsent(order.id, () => 0);
+    _ensureBellLoopRunning();
+    unawaited(_playNewOrderSound());
+    unawaited(NotificationService.instance.showNewOrderNotification(order));
+  }
+
+  void _stopAlertForOrder(String orderId) {
+    if (_ringingOrderIds.remove(orderId)) {
+      _ringingOrdersById.remove(orderId);
+      _ringTickCountByOrderId.remove(orderId);
+      _pushLog('Stopped bell for order: $orderId');
+      unawaited(NotificationService.instance.cancelOrderNotification(orderId));
+    }
+
+    if (_ringingOrderIds.isEmpty) {
+      _bellLoopTimer?.cancel();
+      _bellLoopTimer = null;
+      final players = List<AudioPlayer>.from(_activeBellPlayers);
+      _activeBellPlayers.clear();
+      for (final player in players) {
+        unawaited(player.stop());
+        unawaited(player.dispose());
+      }
+    }
+  }
+
+  void _ensureBellLoopRunning() {
+    if (_bellLoopTimer != null) return;
+
+    _bellLoopTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (_ringingOrderIds.isEmpty) {
+        _bellLoopTimer?.cancel();
+        _bellLoopTimer = null;
+        return;
+      }
+      _pushLog('Bell loop tick for ${_ringingOrderIds.length} active order(s)');
+      unawaited(_playNewOrderSound());
+
+      for (final entry in _ringingOrdersById.entries) {
+        final orderId = entry.key;
+        final order = entry.value;
+        final nextTick = (_ringTickCountByOrderId[orderId] ?? 0) + 1;
+        _ringTickCountByOrderId[orderId] = nextTick;
+        unawaited(
+          NotificationService.instance.showNewOrderNotification(
+            order,
+            ringTick: nextTick,
+          ),
+        );
+      }
+    });
   }
 
   void _pushLog(String message) {
@@ -286,6 +444,16 @@ class OrderProvider extends ChangeNotifier {
   @override
   void dispose() {
     log.d('[OrderProvider] Disposing...');
+    _bellLoopTimer?.cancel();
+    _fallbackPollTimer?.cancel();
+    _ringingOrderIds.clear();
+    _ringingOrdersById.clear();
+    _ringTickCountByOrderId.clear();
+    final players = List<AudioPlayer>.from(_activeBellPlayers);
+    _activeBellPlayers.clear();
+    for (final player in players) {
+      unawaited(player.dispose());
+    }
     _socketService.dispose();
     _apiService.dispose();
     super.dispose();
