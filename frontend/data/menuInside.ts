@@ -186,4 +186,12 @@ export const menuInside: MenuItemData[] = [
     id: "plain-paratha", name: "Plain Paratha", description: "Classic layered flatbread",
     price: 25, image: "/images/menu/food-items/aloo-paratha.webp", category: "Paratha", tags: [],
   },
+  {
+    id: "curd", name: "Curd", description: "Fresh plain curd — great with paratha",
+    price: 22, image: "/frontend/curd.webp", category: "Paratha", tags: [],
+  },
+  {
+    id: "butter", name: "Butter", description: "Creamy butter to spread on paratha",
+    price: 10, image: "/frontend/butter.webp", category: "Paratha", tags: [],
+  },
 ]

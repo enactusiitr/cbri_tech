@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" role="img" aria-label="Butter slab">
+  <rect width="100%" height="100%" fill="#fffefb"/>
+  <g transform="translate(40,80)">
+    <rect x="40" y="40" width="280" height="100" rx="12" fill="#ffe57f" stroke="#ffd24d"/>
+    <ellipse cx="180" cy="160" rx="90" ry="20" fill="#ffef9a" opacity="0.8"/>
+    <g fill="#fff5d6">
+      <circle cx="140" cy="90" r="10"/>
+      <circle cx="220" cy="110" r="8"/>
+    </g>
+  </g>
+</svg>
