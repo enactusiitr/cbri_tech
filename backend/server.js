@@ -137,10 +137,20 @@ app.get('/api/orders', async (req, res) => {
 // 3. ANDROID APP: Update order status (Accept/Reject/Done)
 app.put('/api/orders/:id/status', async (req, res) => {
   try {
-    const { status } = req.body;
+    const statusRaw = req.body?.status;
+    const status = String(statusRaw || '').toLowerCase().trim();
+    const estimatedTimeInput =
+      req.body?.estimatedTime ??
+      req.body?.estimateTime ??
+      req.body?.estimated_time ??
+      req.body?.time;
+
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Status is required' });
+    }
     
     // If marked as 'completed' or 'rejected', delete it from DB as requested
-    if (status.toLowerCase() === 'completed' || status.toLowerCase() === 'rejected') {
+    if (status === 'completed' || status === 'rejected') {
       const deletedOrder = await Order.findByIdAndDelete(req.params.id);
       if (!deletedOrder) {
         return res.status(404).json({ success: false, message: 'Order not found' });
@@ -151,10 +161,22 @@ app.put('/api/orders/:id/status', async (req, res) => {
       return res.json({ success: true, order: { _id: deletedOrder._id, status: status.toUpperCase() } });
     }
 
+    const updateDoc = { status };
+    if (status === 'accepted') {
+      const matchedMinutes = String(estimatedTimeInput ?? '').match(/\d+/);
+      const normalizedEstimatedTime = matchedMinutes ? Number(matchedMinutes[0]) : Number(estimatedTimeInput);
+      const finalEstimatedTime = Number.isFinite(normalizedEstimatedTime) && normalizedEstimatedTime > 0
+        ? normalizedEstimatedTime
+        : 30;
+
+      updateDoc.estimatedTime = finalEstimatedTime;
+      updateDoc.estimatedDeliveryTime = new Date(Date.now() + finalEstimatedTime * 60000);
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id, 
-      { status }, 
-      { new: true }
+      req.params.id,
+      updateDoc,
+      { new: true, runValidators: true }
     );
     
     if (!updatedOrder) {
@@ -170,7 +192,7 @@ app.put('/api/orders/:id/status', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });

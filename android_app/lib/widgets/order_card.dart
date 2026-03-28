@@ -12,11 +12,16 @@ import '../config/app_theme.dart';
 import '../models/order_model.dart';
 import '../providers/order_provider.dart';
 
-class OrderCard extends StatelessWidget {
+class OrderCard extends StatefulWidget {
   final Order order;
 
   const OrderCard({super.key, required this.order});
 
+  @override
+  State<OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<OrderCard> {
   @override
   Widget build(BuildContext context) {
     final isCompact = MediaQuery.of(context).size.width < 380;
@@ -24,13 +29,13 @@ class OrderCard extends StatelessWidget {
     // We only watch the updating state for THIS specific order,
     // avoiding unnecessary rebuilds for all other cards.
     final isUpdating = context.select<OrderProvider, bool>(
-      (p) => p.isUpdating(order.id),
+      (p) => p.isUpdating(widget.order.id),
     );
 
     return Card(
       // Use the order ID as key so Flutter can efficiently reorder cards
       // when orders move between tabs
-      key: ValueKey(order.id),
+      key: ValueKey(widget.order.id),
       child: Padding(
         padding: EdgeInsets.all(isCompact ? 12 : 16),
         child: Column(
@@ -56,7 +61,7 @@ class OrderCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context, bool isCompact) {
     final theme = Theme.of(context);
     // Force display timestamps in IST (+05:30) regardless of device timezone.
-    final createdAtIst = order.createdAt.toUtc().add(const Duration(hours: 5, minutes: 30));
+    final createdAtIst = widget.order.createdAt.toUtc().add(const Duration(hours: 5, minutes: 30));
     final formattedTime = DateFormat('HH:mm').format(createdAtIst);
     final formattedDate = DateFormat('MMM d').format(createdAtIst);
 
@@ -68,7 +73,7 @@ class OrderCard extends StatelessWidget {
           width: isCompact ? 34 : 40,
           height: isCompact ? 34 : 40,
           decoration: BoxDecoration(
-            color: AppTheme.statusBgColor(order.status.value),
+            color: AppTheme.statusBgColor(widget.order.status.value),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -77,7 +82,7 @@ class OrderCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isCompact ? 14 : 16,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.statusColor(order.status.value),
+                color: AppTheme.statusColor(widget.order.status.value),
               ),
             ),
           ),
@@ -90,14 +95,14 @@ class OrderCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                order.customerName,
+                widget.order.customerName,
                 style: theme.textTheme.titleLarge,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
-                'ID: ${_shortId(order.id)}',
+                'ID: ${_shortId(widget.order.id)}',
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 4),
@@ -105,7 +110,7 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Icon(Icons.phone, size: isCompact ? 12 : 14, color: AppTheme.textSecondary),
                   const SizedBox(width: 4),
-                  Text(order.phoneNumber, style: theme.textTheme.bodyMedium),
+                  Text(widget.order.phoneNumber, style: theme.textTheme.bodyMedium),
                 ]
               ),
               const SizedBox(height: 2),
@@ -113,7 +118,7 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Icon(Icons.location_on, size: isCompact ? 12 : 14, color: AppTheme.textSecondary),
                   const SizedBox(width: 4),
-                  Expanded(child: Text(order.address, style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                  Expanded(child: Text(widget.order.address, style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis)),
                 ]
               ),
             ],
@@ -158,7 +163,7 @@ class OrderCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         // Render each item in the order
-        ...order.items.map((item) => _buildOrderItemRow(context, item, isCompact)),
+        ...widget.order.items.map((item) => _buildOrderItemRow(context, item, isCompact)),
       ],
     );
   }
@@ -223,7 +228,7 @@ class OrderCard extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        color: AppTheme.statusBgColor(order.status.value),
+        color: AppTheme.statusBgColor(widget.order.status.value),
         child: hasImage
             ? Image.network(
                 item.imageUrl,
@@ -239,7 +244,7 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildFooter(BuildContext context, bool isUpdating, bool isCompact) {
     final theme = Theme.of(context);
-    final actionConfig = _getActionConfig(order.status);
+    final actionConfig = _getActionConfig(widget.order.status);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -255,7 +260,7 @@ class OrderCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              '₹${order.totalAmount.toStringAsFixed(2)}',
+              '₹${widget.order.totalAmount.toStringAsFixed(2)}',
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
@@ -265,7 +270,7 @@ class OrderCard extends StatelessWidget {
         ),
 
         // Action buttons
-        if (order.status == OrderStatus.newOrder)
+        if (widget.order.status == OrderStatus.newOrder)
           _buildNewOrderActions(context, isUpdating, isCompact)
         else if (actionConfig != null)
           _buildActionButton(context, actionConfig, isUpdating),
@@ -278,48 +283,52 @@ class OrderCard extends StatelessWidget {
     bool isUpdating,
     bool isCompact,
   ) {
+    final rejectButton = OutlinedButton.icon(
+      onPressed: isUpdating ? null : () => _onRejectPressed(context),
+      icon: const Icon(Icons.call_rounded, size: 16),
+      label: const Text('Reject'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red.shade700,
+        side: BorderSide(color: Colors.red.shade300),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 10 : 12,
+          vertical: 8,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+
+    final acceptButton = ElevatedButton(
+      onPressed: isUpdating
+          ? null
+          : () => _onAcceptPressed(context),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.accentOrange,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 12 : 16,
+          vertical: 8,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      child: const Text(
+        'Accept',
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+      ),
+    );
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       alignment: WrapAlignment.end,
       children: [
-        OutlinedButton.icon(
-          onPressed: isUpdating ? null : () => _onRejectPressed(context),
-          icon: const Icon(Icons.call_rounded, size: 16),
-          label: const Text('Reject'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.red.shade700,
-            side: BorderSide(color: Colors.red.shade300),
-            padding: EdgeInsets.symmetric(
-              horizontal: isCompact ? 10 : 12,
-              vertical: 8,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: isUpdating
-              ? null
-              : () => _onActionPressed(context, OrderStatus.preparing),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            padding: EdgeInsets.symmetric(
-              horizontal: isCompact ? 12 : 16,
-              vertical: 8,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Text(
-            'Accept',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-        ),
+        rejectButton,
+        acceptButton,
       ],
     );
   }
@@ -376,19 +385,97 @@ class OrderCard extends StatelessWidget {
   }
 
   /// Dispatches the status update action to the provider
-  void _onActionPressed(BuildContext context, OrderStatus nextStatus) {
-    context.read<OrderProvider>().updateOrderStatus(order.id, nextStatus);
+  void _onActionPressed(
+    BuildContext context,
+    OrderStatus nextStatus, {
+    int? estimatedTimeMinutes,
+  }) {
+    context.read<OrderProvider>().updateOrderStatus(
+          widget.order.id,
+          nextStatus,
+          estimatedTimeMinutes: estimatedTimeMinutes,
+        );
+  }
+
+  Future<void> _onAcceptPressed(BuildContext context) async {
+    final estimatedTimeMinutes = await _showEstimatedTimePicker(context);
+    if (!context.mounted || estimatedTimeMinutes == null) return;
+
+    _onActionPressed(
+      context,
+      OrderStatus.preparing,
+      estimatedTimeMinutes: estimatedTimeMinutes,
+    );
+  }
+
+  Future<int?> _showEstimatedTimePicker(BuildContext context) {
+    int selectedTime = 30;
+
+    return showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select estimated completion time',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      initialValue: selectedTime,
+                      items: const [
+                        DropdownMenuItem<int>(value: 30, child: Text('30 min')),
+                        DropdownMenuItem<int>(value: 60, child: Text('1 hr')),
+                        DropdownMenuItem<int>(value: 90, child: Text('1.30 min')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setModalState(() {
+                            selectedTime = value;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(selectedTime),
+                        child: const Text('Confirm Accept'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _onRejectPressed(BuildContext context) async {
     await _callCustomer(context);
     if (context.mounted) {
-      context.read<OrderProvider>().updateOrderStatus(order.id, OrderStatus.rejected);
+      context
+          .read<OrderProvider>()
+          .updateOrderStatus(widget.order.id, OrderStatus.rejected);
     }
   }
 
   Future<void> _callCustomer(BuildContext context) async {
-    final telUri = Uri(scheme: 'tel', path: order.phoneNumber);
+    final telUri = Uri(scheme: 'tel', path: widget.order.phoneNumber);
     if (await canLaunchUrl(telUri)) {
       await launchUrl(telUri);
       return;
@@ -396,7 +483,7 @@ class OrderCard extends StatelessWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open dialer for ${order.phoneNumber}')),
+        SnackBar(content: Text('Could not open dialer for ${widget.order.phoneNumber}')),
       );
     }
   }

@@ -49,7 +49,7 @@ Future<void> main() async {
     log.w('[main] ALLOW_BAD_CERTIFICATES enabled for ${AppConfig.backendHost}');
   }
 
-  log.i('[main] Starting Restaurant Dashboard...');
+  log.i('[main] Starting Zakaaz Shopkeeper...');
 
   await NotificationService.instance.initialize();
 
@@ -89,7 +89,7 @@ class RestaurantDashboardApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Restaurant Dashboard',
+        title: 'Zakaaz Shopkeeper',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const DashboardScreen(),

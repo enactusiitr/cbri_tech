@@ -12,6 +12,8 @@ const orderSchema = new mongoose.Schema({
     imageUrl: { type: String, default: '' }
   }],
   totalAmount: { type: Number, required: true, min: 0, default: 0 },
+  estimatedTime: { type: Number, min: 1 },
+  estimatedDeliveryTime: { type: Date },
   status: { 
     type: String, 
     enum: ['pending', 'accepted', 'rejected', 'completed'],

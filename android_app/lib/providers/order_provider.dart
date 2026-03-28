@@ -152,9 +152,14 @@ class OrderProvider extends ChangeNotifier {
   ///
   /// [orderId]   — the ID of the order to update
   /// [newStatus] — the new [OrderStatus]
+  /// [estimatedTimeMinutes] — ETA in minutes to include for accepted orders
   ///
   /// Optimistically updates the UI immediately, then reverts on failure.
-  Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
+  Future<void> updateOrderStatus(
+    String orderId,
+    OrderStatus newStatus, {
+    int? estimatedTimeMinutes,
+  }) async {
     log.i('[OrderProvider] Updating order $orderId → ${newStatus.value}');
     _pushLog('Update order $orderId -> ${newStatus.value}');
 
@@ -180,6 +185,7 @@ class OrderProvider extends ChangeNotifier {
       final updatedOrder = await _apiService.updateOrderStatus(
         orderId,
         newStatus.value,
+        estimatedTimeMinutes: estimatedTimeMinutes,
       );
 
       // Replace with the server's authoritative version

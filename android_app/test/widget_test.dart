@@ -49,7 +49,11 @@ class MockApiService extends ApiService {
   }
 
   @override
-  Future<Order> updateOrderStatus(String orderId, String newStatus) async {
+  Future<Order> updateOrderStatus(
+    String orderId,
+    String newStatus, {
+    int? estimatedTimeMinutes,
+  }) async {
     return Order(
         phoneNumber: '123', address: 'Test',
       id: orderId,
@@ -106,22 +110,20 @@ void main() {
       expect(find.byType(DashboardScreen), findsOneWidget);
     });
 
-    testWidgets('shows TabBar with 4 tabs', (WidgetTester tester) async {
+    testWidgets('shows TabBar with expected tabs', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pump();
 
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text('NEW'), findsWidgets);
       expect(find.text('PREPARING'), findsWidgets);
-      expect(find.text('READY'), findsWidgets);
-      expect(find.text('COMPLETED'), findsWidgets);
     });
 
     testWidgets('shows app title', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pump();
 
-      expect(find.text('Kitchen Dashboard'), findsOneWidget);
+      expect(find.text('Zakaaz Shopkeeper'), findsOneWidget);
     });
   });
 

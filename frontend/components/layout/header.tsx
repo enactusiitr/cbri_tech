@@ -35,7 +35,7 @@ export function Header() {
             <span className="text-xl font-black text-primary-foreground">Z</span>
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-black tracking-tight text-poster">Zakaz</h1>
+            <h1 className="text-lg font-black tracking-tight text-poster">Zakaaz</h1>
           </div>
         </Link>
 

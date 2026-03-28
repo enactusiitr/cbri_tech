@@ -1,5 +1,5 @@
 {
-  "name": "zakaz",
+  "name": "Zakaaz",
   "buildCommand": "npm run build",
   "outputDirectory": ".next"
 }

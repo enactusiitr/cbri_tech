@@ -85,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kitchen Dashboard'),
+          const Text('Zakaaz Shopkeeper'),
           Text(
             _getCurrentDateString(),
             style: TextStyle(

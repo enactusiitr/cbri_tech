@@ -1,4 +1,4 @@
-// Zakaz - Data Layer
+// Zakaaz - Data Layer
 
 export interface Vendor {
   id: string
