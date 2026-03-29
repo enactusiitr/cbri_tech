@@ -299,25 +299,61 @@ class OrderCard extends StatelessWidget {
             ),
           ),
         ),
-        ElevatedButton(
-          onPressed: isUpdating
-              ? null
-              : () => _onActionPressed(context, OrderStatus.preparing),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 0,
+        PopupMenuButton<int>(
+          enabled: !isUpdating,
+          onSelected: (int estimatedMinutes) {
+            context.read<OrderProvider>().updateOrderStatus(
+              order.id, 
+              OrderStatus.preparing, 
+              estimatedTime: estimatedMinutes,
+            );
+          },
+          offset: const Offset(0, 40),
+          itemBuilder: (BuildContext context) => const <PopupMenuEntry<int>>[
+            PopupMenuItem<int>(
+              value: 30,
+              child: Text('30 min'),
+            ),
+            PopupMenuItem<int>(
+              value: 60,
+              child: Text('1 hr'),
+            ),
+            PopupMenuItem<int>(
+              value: 90,
+              child: Text('1.30 min'),
+            ),
+          ],
+          child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: isCompact ? 12 : 16,
               vertical: 8,
             ),
-            shape: RoundedRectangleBorder(
+            decoration: BoxDecoration(
+              color: isUpdating ? AppTheme.accentOrange.withOpacity(0.5) : AppTheme.accentOrange,
               borderRadius: BorderRadius.circular(10),
             ),
-          ),
-          child: const Text(
-            'Accept',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isUpdating)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                else ...const [
+                  Text(
+                    'Accept',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
+                ]
+              ],
+            ),
           ),
         ),
       ],

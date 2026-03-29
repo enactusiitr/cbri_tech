@@ -144,10 +144,15 @@ class ApiService {
   /// [newStatus] — the new status value (e.g. 'PREPARING')
   ///
   /// Returns the updated [Order] as returned by the server.
-  Future<Order> updateOrderStatus(String orderId, String newStatus) async {
+  Future<Order> updateOrderStatus(String orderId, String newStatus, {int? estimatedTime}) async {
     final url = Uri.parse('${AppConfig.ordersEndpoint}/$orderId/status');
     final statusForBackend = _mapStatusForBackend(newStatus);
-    final body = jsonEncode({'status': statusForBackend});
+    
+    final payload = <String, dynamic>{'status': statusForBackend};
+    if (estimatedTime != null) {
+      payload['estimatedTime'] = estimatedTime;
+    }
+    final body = jsonEncode(payload);
 
     log.i('[ApiService] PUT $url → status: $statusForBackend');
 
