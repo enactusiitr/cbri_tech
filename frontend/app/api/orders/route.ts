@@ -13,24 +13,33 @@ type UpstreamResponse = {
   body: string
 }
 
+import http from "node:http"
+
 function postJsonToUpstream(urlString: string, payload: unknown): Promise<UpstreamResponse> {
   return new Promise((resolve, reject) => {
     const url = new URL(urlString)
     const body = JSON.stringify(payload)
+    const isHttps = url.protocol === "https:"
+    const reqModule = isHttps ? https : http
 
-    const request = https.request(
-      {
+    const options: any = {
         protocol: url.protocol,
         hostname: url.hostname,
-        port: url.port || 443,
+        port: url.port || (isHttps ? 443 : 80),
         path: `${url.pathname}${url.search}`,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Content-Length": Buffer.byteLength(body),
         },
-        agent: insecureTlsAgent,
-      },
+    }
+
+    if (isHttps) {
+        options.agent = insecureTlsAgent
+    }
+
+    const request = reqModule.request(
+      options,
       (response) => {
         let raw = ""
         response.setEncoding("utf8")
@@ -64,7 +73,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const upstreamUrl = `${backendBaseUrl}/orders`
+    const upstreamUrl = `${backendBaseUrl}/api/orders`
 
     const upstreamResponse = await postJsonToUpstream(upstreamUrl, payload)
     const rawBody = upstreamResponse.body

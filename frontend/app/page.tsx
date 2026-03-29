@@ -4,9 +4,12 @@ import Link from "next/link"
 import { ArrowRight, CheckCircle2, Store } from "lucide-react"
 import { useStore } from "@/context/StoreContext"
 import { STORES, getStoreLabel, storeSlugMap } from "@/lib/data"
+import { GoogleLoginButton } from "@/components/GoogleLoginButton"
+import { useGoogleAuth } from "@/context/GoogleAuthContext"
 
 export default function SelectStorePage() {
   const { selectedStore, setStore } = useStore()
+  const { user } = useGoogleAuth()
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 flex items-center justify-center">
@@ -21,6 +24,16 @@ export default function SelectStorePage() {
             Continue with your campus location to see the correct restaurants and menu.
           </p>
         </div>
+
+        {!user && (
+          <div className="flex flex-col items-center justify-center mb-8 bg-card p-6 rounded-2xl border-2 border-foreground poster-shadow-sm">
+            <h2 className="text-xl font-bold mb-2">Login Required</h2>
+            <p className="text-muted-foreground mb-4 text-center text-sm font-medium">
+              Please authenticate with your Google account (.iitr.ac.in) to explore the menu and place orders.
+            </p>
+            <GoogleLoginButton />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {STORES.map((store) => (

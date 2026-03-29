@@ -1,135 +1,237 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   User,
-  MapPin,
-  CreditCard,
-  Bell,
-  HelpCircle,
   LogOut,
   ChevronRight,
-  Heart,
-  Gift,
-  Settings,
   Store,
+  ArrowLeft,
+  ShoppingBag,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Package
 } from "lucide-react"
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { useStore } from "@/context/StoreContext"
+import { useStore, useStorePath } from "@/context/StoreContext"
 import { getStoreLabel } from "@/lib/data"
-
-const menuItems = [
-  { icon: MapPin, label: "Saved Addresses", href: "#" },
-  { icon: CreditCard, label: "Payment Methods", href: "#" },
-  { icon: Heart, label: "Favorites", href: "#" },
-  { icon: Gift, label: "Rewards & Offers", href: "#", badge: "2 NEW" },
-  { icon: Bell, label: "Notifications", href: "#" },
-  { icon: Settings, label: "Settings", href: "#" },
-  { icon: HelpCircle, label: "Help & Support", href: "#" },
-]
+import { useGoogleAuth } from "@/context/GoogleAuthContext"
 
 export default function ProfilePage() {
   const router = useRouter()
   const { selectedStore } = useStore()
+  const storePath = useStorePath()
+  const { user, logout } = useGoogleAuth()
+
+  const [orders, setOrders] = useState<any[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [errorOrders, setErrorOrders] = useState("")
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/")
+    } else {
+      fetchOrders()
+    }
+  }, [user, router])
+
+  const fetchOrders = async () => {
+    if (!user?.email) return;
+    setLoadingOrders(true)
+    setErrorOrders("")
+    try {
+      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/orders`
+      console.log(`Fetching orders from: ${apiUrl}`)
+      
+      const res = await fetch(apiUrl)
+      if (!res.ok) {
+         const errorBody = await res.text().catch(() => "Could not read error body")
+         const errorMsg = `HTTP Error ${res.status}: ${res.statusText}. Body: ${errorBody}`;
+         console.error("Fetch error details:", errorMsg);
+         throw new Error(`Failed to fetch orders (HTTP ${res.status}).`)
+      }
+      
+      const data = await res.json()
+      if (data.success && data.orders) {
+        const myOrders = data.orders.filter(
+          (order: any) => order.userEmail === user.email || order.customer?.email === user.email
+        )
+        myOrders.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        setOrders(myOrders)
+      } else {
+        console.warn("API response did not contain success: true or an orders array.", data);
+        setOrders([])
+      }
+    } catch (err: any) {
+      console.error("Fetch error:", err)
+      if (err instanceof TypeError && err.message.toLowerCase().includes('failed to fetch')) {
+         console.error("CORS or Network Error detected. Backend might not be allowing this origin, or terminal server is down.");
+         setErrorOrders("Network error: Could not connect to backend (Possible CORS or server down issue).")
+      } else {
+         setErrorOrders(err.message || "An unexpected error occurred while fetching orders.")
+      }
+    } finally {
+      setLoadingOrders(false)
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    router.push("/")
+  }
 
   const handleChangeStore = () => {
     localStorage.removeItem("store")
-    router.push("/select-store")
+    router.push("/")
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="animate-pulse flex flex-col items-center">
+            <div className="w-16 h-16 bg-muted rounded-full mb-4"></div>
+            <div className="h-4 w-32 bg-muted rounded"></div>
+        </div>
+      </div>
+    )
+  }
+
+  const getStatusIcon = (status: string) => {
+    const s = (status || "").toLowerCase()
+    if (s.includes("deliv") || s.includes("complet")) return <CheckCircle className="w-4 h-4 text-green-500" />
+    if (s.includes("cancel") || s.includes("reject")) return <XCircle className="w-4 h-4 text-red-500" />
+    return <Clock className="w-4 h-4 text-blue-500" />
   }
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-primary px-4 py-8 border-b-2 border-foreground">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-card rounded-full border-4 border-foreground flex items-center justify-center poster-shadow">
-              <User className="w-10 h-10 text-foreground" />
-            </div>
-            <div className="text-primary-foreground">
-              <h1 className="text-2xl font-black text-poster">CAMPUS FOODIE</h1>
-              <p className="opacity-90">+91 98765 43210</p>
-              <button className="mt-1 text-sm font-bold underline">Edit Profile</button>
-            </div>
-          </div>
+      <header className="sticky top-0 z-40 bg-background border-b-2 border-foreground">
+        <div className="flex items-center gap-4 h-16 px-4 max-w-lg mx-auto">
+          <Link
+            href={storePath("/")}
+            className="p-2 rounded-lg border-2 border-foreground hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-xl font-black text-poster">MY PROFILE</h1>
         </div>
       </header>
 
-      {/* Stats */}
-      <div className="px-4 -mt-4 max-w-lg mx-auto">
-        <div className="flex justify-around p-4 bg-card rounded-xl border-2 border-foreground poster-shadow">
-          <div className="text-center">
-            <p className="text-2xl font-black text-poster">12</p>
-            <p className="text-sm text-muted-foreground">Orders</p>
-          </div>
-          <div className="w-px bg-border" />
-          <div className="text-center">
-            <p className="text-2xl font-black text-poster">Rs.150</p>
-            <p className="text-sm text-muted-foreground">Cashback</p>
-          </div>
-          <div className="w-px bg-border" />
-          <div className="text-center">
-            <p className="text-2xl font-black text-poster">3</p>
-            <p className="text-sm text-muted-foreground">Favorites</p>
+      {/* User Info */}
+      <div className="bg-primary px-4 py-8 border-b-2 border-foreground">
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 bg-card rounded-full border-4 border-foreground overflow-hidden flex items-center justify-center poster-shadow">
+               <img src={user.picture} alt="Profile" className="w-full h-full object-cover" />
+            </div>
+            <div className="text-primary-foreground">
+              <h1 className="text-2xl font-black text-poster leading-tight">{user.name}</h1>
+              <p className="opacity-90 font-medium text-sm mt-1">{user.email}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="px-4 py-6 max-w-lg mx-auto">
+      <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
+        {/* Store Context */}
         <button
           onClick={handleChangeStore}
-          className="w-full mb-4 flex items-center justify-between p-4 bg-card rounded-xl border-2 border-foreground hover:bg-muted transition-colors poster-shadow-sm"
+          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border-2 border-foreground hover:bg-muted transition-colors poster-shadow-sm"
         >
           <div className="flex items-center gap-3">
             <Store className="w-5 h-5 text-primary" />
             <div className="text-left">
-              <p className="font-bold">Change Store</p>
+              <p className="font-bold">Change Campus Store</p>
               <p className="text-sm text-muted-foreground">
-                {selectedStore ? `Currently: ${getStoreLabel(selectedStore)}` : "Select your campus store"}
+                {selectedStore ? `Currently browsing: ${getStoreLabel(selectedStore)}` : "Select a store"}
               </p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <div className="bg-card rounded-xl border-2 border-foreground overflow-hidden">
-          {menuItems.map((item, index) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex items-center justify-between p-4 hover:bg-muted transition-colors ${
-                index !== menuItems.length - 1 ? "border-b-2 border-border" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs font-bold rounded">
-                    {item.badge}
-                  </span>
-                )}
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Link>
-          ))}
+        {/* My Orders Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-black text-poster flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5" />
+            MY ORDERS
+          </h2>
+
+          <div className="bg-card rounded-xl border-2 border-foreground overflow-hidden">
+             {loadingOrders ? (
+                <div className="p-8 flex justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+             ) : errorOrders ? (
+                <div className="p-6 text-center text-red-500 font-bold">
+                    <p>{errorOrders}</p>
+                    <button onClick={fetchOrders} className="mt-2 text-sm underline">Try Again</button>
+                </div>
+             ) : orders.length === 0 ? (
+                <div className="p-10 flex flex-col items-center justify-center text-center">
+                    <Package className="w-12 h-12 text-muted-foreground mb-3 opacity-50" />
+                    <p className="font-bold text-lg mb-1">No orders yet</p>
+                    <p className="text-muted-foreground text-sm mb-4">You haven&apos;t placed any orders with this account.</p>
+                    <Link href={storePath("/")} className="px-4 py-2 bg-primary text-primary-foreground font-bold rounded-lg border-2 border-foreground poster-shadow-sm text-sm">
+                        Start Ordering
+                    </Link>
+                </div>
+             ) : (
+                <div className="flex flex-col max-h-[400px] overflow-y-auto">
+                    {orders.map((order, index) => (
+                        <div key={order._id || index} className={`p-4 ${index !== orders.length - 1 ? 'border-b-2 border-border' : ''}`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="font-bold text-sm">Order #{String(order._id || order.id || "").substring(0, 8)}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {order.createdAt ? new Date(order.createdAt).toLocaleString() : "Recent"}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-black">Rs.{order.totalAmount || order.pricing?.payableAmount || 0}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1.5 mb-3 bg-muted w-fit px-2 py-1 rounded-md">
+                                {getStatusIcon(order.status)}
+                                <span className="text-xs font-bold uppercase tracking-wider">{order.status || "Processing"}</span>
+                            </div>
+
+                            <div className="text-sm">
+                                <ul className="list-disc list-inside text-muted-foreground">
+                                    {order.items?.map((item: any, i: number) => (
+                                        <li key={i} className="truncate">
+                                            {item.quantity}x {item.itemName || item.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+             )}
+          </div>
         </div>
 
         {/* Logout Button */}
-        <button className="flex items-center justify-center gap-2 w-full mt-4 p-4 bg-muted rounded-xl border-2 border-foreground font-bold text-secondary hover:bg-secondary/10 transition-colors">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center justify-center gap-2 w-full p-4 bg-red-100 rounded-xl border-2 border-red-500 font-bold text-red-600 hover:bg-red-200 transition-colors poster-shadow-sm"
+        >
           <LogOut className="w-5 h-5" />
           Log Out
         </button>
 
         {/* App Version */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Zakaaz v1.0.0
+        <p className="text-center text-sm text-muted-foreground pt-4">
+          CampusBites v1.0.0
         </p>
       </div>
 
-      <BottomNav />
     </div>
   )
 }

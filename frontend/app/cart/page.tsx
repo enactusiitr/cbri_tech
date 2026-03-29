@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context"
 import { CartItemCard } from "@/components/cart/cart-item"
 import { useStore, useStorePath } from "@/context/StoreContext"
 import { calculateItemTotal } from "@/lib/data"
+import { useGoogleAuth } from "@/context/GoogleAuthContext"
 
 export default function CartPage() {
   const router = useRouter()
@@ -31,8 +32,14 @@ export default function CartPage() {
 
   const subtotal = getSubtotal()
   const finalTotal = subtotal + 20 + 0 - 20
+  const { user } = useGoogleAuth()
 
   const handleCheckout = async () => {
+    if (!user) {
+      alert("Please login with your university Google account to place an order.")
+      return
+    }
+
     const newErrors = { name: "", phone: "", address: "" }
     let isValid = true
 
@@ -87,6 +94,9 @@ export default function CartPage() {
             ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.menuItem.image}`
             : ""
         })),
+        totalAmount: Number(finalTotal),
+        userEmail: user.email,
+        userName: user.name,
         pricing: {
           subtotal: Number(subtotal),
           deliveryFee: 20,

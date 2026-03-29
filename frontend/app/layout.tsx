@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { CartProvider } from "@/lib/cart-context"
 import { StoreProvider, StoreGuard } from "@/context/StoreContext"
+import { GoogleAuthProvider } from "@/context/GoogleAuthContext"
+import Script from "next/script"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -97,11 +99,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased grain-texture">
-        <StoreProvider>
-          <CartProvider>
-            <StoreGuard>{children}</StoreGuard>
-          </CartProvider>
-        </StoreProvider>
+        <GoogleAuthProvider>
+          <StoreProvider>
+            <CartProvider>
+              <StoreGuard>{children}</StoreGuard>
+            </CartProvider>
+          </StoreProvider>
+        </GoogleAuthProvider>
+        <Script src="https://accounts.google.com/gsi/client?hl=en" strategy="beforeInteractive" />
         <Analytics />
       </body>
     </html>
