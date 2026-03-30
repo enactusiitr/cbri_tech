@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  userName: { type: String, default: '' },
+  userEmail: { type: String, default: '' },
   phoneNumber: { type: String, required: true },
   address: { type: String, required: true },
   canteen: { type: String, default: 'cbri inside' },

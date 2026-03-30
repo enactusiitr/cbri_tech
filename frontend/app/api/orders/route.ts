@@ -15,10 +15,10 @@ type UpstreamResponse = {
 
 import http from "node:http"
 
-function postJsonToUpstream(urlString: string, payload: unknown): Promise<UpstreamResponse> {
+function requestUpstream(urlString: string, method: "GET" | "POST", payload?: unknown): Promise<UpstreamResponse> {
   return new Promise((resolve, reject) => {
     const url = new URL(urlString)
-    const body = JSON.stringify(payload)
+    const body = method === "POST" ? JSON.stringify(payload ?? {}) : ""
     const isHttps = url.protocol === "https:"
     const reqModule = isHttps ? https : http
 
@@ -27,11 +27,13 @@ function postJsonToUpstream(urlString: string, payload: unknown): Promise<Upstre
         hostname: url.hostname,
         port: url.port || (isHttps ? 443 : 80),
         path: `${url.pathname}${url.search}`,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(body),
-        },
+        method,
+        headers: {},
+    }
+
+    if (method === "POST") {
+      options.headers["Content-Type"] = "application/json"
+      options.headers["Content-Length"] = Buffer.byteLength(body)
     }
 
     if (isHttps) {
@@ -56,37 +58,87 @@ function postJsonToUpstream(urlString: string, payload: unknown): Promise<Upstre
     )
 
     request.on("error", reject)
-    request.write(body)
+    if (method === "POST") {
+      request.write(body)
+    }
     request.end()
   })
+}
+
+function parseUpstreamBody(upstreamResponse: UpstreamResponse) {
+  const rawBody = upstreamResponse.body
+  try {
+    return rawBody ? JSON.parse(rawBody) : null
+  } catch {
+    return {
+      success: false,
+      message: rawBody || `Upstream request failed with status ${upstreamResponse.status}`,
+    }
+  }
+}
+
+function getOrdersEndpoint(backendBaseUrl: string) {
+  const parsed = new URL(backendBaseUrl)
+  const segments = parsed.pathname.split("/").filter(Boolean)
+  const lastSegment = segments[segments.length - 1]?.toLowerCase() || ""
+  const pathLooksApiScoped = lastSegment === "api" || lastSegment.endsWith("-api")
+
+  return pathLooksApiScoped ? `${backendBaseUrl}/orders` : `${backendBaseUrl}/api/orders`
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || "").replace(/\/+$/, "")
+
+    if (!backendBaseUrl) {
+      // Return empty orders list if backend not configured
+      return NextResponse.json(
+        { success: true, orders: [] },
+        { status: 200 },
+      )
+    }
+
+    const userEmail = request.nextUrl.searchParams.get("userEmail")
+    const ordersEndpoint = getOrdersEndpoint(backendBaseUrl)
+    const upstreamUrl = userEmail
+      ? `${ordersEndpoint}?userEmail=${encodeURIComponent(userEmail)}`
+      : ordersEndpoint
+
+    const upstreamResponse = await requestUpstream(upstreamUrl, "GET")
+    const data = parseUpstreamBody(upstreamResponse)
+
+    if (upstreamResponse.status === 404 && userEmail) {
+      return NextResponse.json({ success: true, orders: [] }, { status: 200 })
+    }
+
+    return NextResponse.json(data, { status: upstreamResponse.status })
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error?.message || "Failed to fetch orders",
+      },
+      { status: 502 },
+    )
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json()
-    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/+$/, "")
+    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || "").replace(/\/+$/, "")
 
     if (!backendBaseUrl) {
       return NextResponse.json(
-        { success: false, message: "Backend URL is not configured" },
-        { status: 500 },
+        { success: false, message: "Backend API is not available. Please try again later." },
+        { status: 503 },
       )
     }
 
-    const upstreamUrl = `${backendBaseUrl}/api/orders`
+    const upstreamUrl = getOrdersEndpoint(backendBaseUrl)
 
-    const upstreamResponse = await postJsonToUpstream(upstreamUrl, payload)
-    const rawBody = upstreamResponse.body
-    let data: any = null
-
-    try {
-      data = rawBody ? JSON.parse(rawBody) : null
-    } catch {
-      data = {
-        success: false,
-          message: rawBody || `Upstream request failed with status ${upstreamResponse.status}`,
-      }
-    }
+    const upstreamResponse = await requestUpstream(upstreamUrl, "POST", payload)
+    const data = parseUpstreamBody(upstreamResponse)
 
     return NextResponse.json(data, { status: upstreamResponse.status })
   } catch (error: any) {

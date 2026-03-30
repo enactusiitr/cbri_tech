@@ -43,11 +43,15 @@ export default function ProfilePage() {
     setLoadingOrders(true)
     setErrorOrders("")
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/orders`
-      console.log(`Fetching orders from: ${apiUrl}`)
-      
+      const apiUrl = `/api/orders?userEmail=${encodeURIComponent(user.email)}`
       const res = await fetch(apiUrl)
       if (!res.ok) {
+         // Treat 404 as no orders, not an error
+         if (res.status === 404) {
+           setOrders([])
+           setErrorOrders("")
+           return
+         }
          const errorBody = await res.text().catch(() => "Could not read error body")
          const errorMsg = `HTTP Error ${res.status}: ${res.statusText}. Body: ${errorBody}`;
          console.error("Fetch error details:", errorMsg);
@@ -56,9 +60,7 @@ export default function ProfilePage() {
       
       const data = await res.json()
       if (data.success && data.orders) {
-        const myOrders = data.orders.filter(
-          (order: any) => order.userEmail === user.email || order.customer?.email === user.email
-        )
+        const myOrders = data.orders
         myOrders.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
         setOrders(myOrders)
       } else {
@@ -104,6 +106,15 @@ export default function ProfilePage() {
     if (s.includes("deliv") || s.includes("complet")) return <CheckCircle className="w-4 h-4 text-green-500" />
     if (s.includes("cancel") || s.includes("reject")) return <XCircle className="w-4 h-4 text-red-500" />
     return <Clock className="w-4 h-4 text-blue-500" />
+  }
+
+  const getCustomerStatusLabel = (status: string) => {
+    const s = (status || "pending").toLowerCase()
+    if (s === "accepted") return "Preparing"
+    if (s === "pending") return "Ordered"
+    if (s === "completed") return "Delivered"
+    if (s === "rejected") return "Rejected"
+    return status || "Processing"
   }
 
   return (
@@ -198,8 +209,14 @@ export default function ProfilePage() {
                             
                             <div className="flex items-center gap-1.5 mb-3 bg-muted w-fit px-2 py-1 rounded-md">
                                 {getStatusIcon(order.status)}
-                                <span className="text-xs font-bold uppercase tracking-wider">{order.status || "Processing"}</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">{getCustomerStatusLabel(order.status)}</span>
                             </div>
+
+                            {String(order.status || "").toLowerCase() === "accepted" && order.estimatedDeliveryTime && (
+                              <p className="text-xs font-semibold text-amber-700 mb-2">
+                                Expected delivery: {new Date(order.estimatedDeliveryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            )}
 
                             <div className="text-sm">
                                 <ul className="list-disc list-inside text-muted-foreground">
@@ -228,7 +245,7 @@ export default function ProfilePage() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground pt-4">
-          CampusBites v1.0.0
+          Zakaaz v1.0.0
         </p>
       </div>
 

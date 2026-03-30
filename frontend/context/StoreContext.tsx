@@ -11,6 +11,7 @@ import {
   storeSlugMap,
   type StoreId,
 } from "@/lib/data"
+import { useGoogleAuth } from "@/context/GoogleAuthContext"
 
 const STORE_KEY = "store"
 
@@ -119,8 +120,21 @@ export function useStorePath() {
 export function StoreGuard({ children }: { children: ReactNode }) {
   const { isHydrated } = useStore()
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, isAuthReady } = useGoogleAuth()
 
-  if (!isHydrated && pathname !== "/") {
+  useEffect(() => {
+    if (!isHydrated || !isAuthReady) return
+    if (pathname !== "/" && !user) {
+      router.replace("/")
+    }
+  }, [isHydrated, isAuthReady, pathname, router, user])
+
+  if ((!isHydrated || !isAuthReady) && pathname !== "/") {
+    return null
+  }
+
+  if (pathname !== "/" && !user) {
     return null
   }
 

@@ -30,14 +30,14 @@ export const metadata: Metadata = {
   creator: "Zakaaz",
   publisher: "Zakaaz",
   generator: "v0.app",
-  metadataBase: new URL("https://campusbites.app"),
+  metadataBase: new URL("https://Zakaaz.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://campusbites.app",
+    url: "https://Zakaaz.app",
     siteName: "Zakaaz",
     title: "Zakaaz - Food Delivery for Students",
     description:
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     description:
       "Order delicious food from your favorite campus vendors. Fast delivery, great prices.",
     images: ["/og-image.jpg"],
-    creator: "@campusbites",
+    creator: "@Zakaaz",
   },
   robots: {
     index: true,

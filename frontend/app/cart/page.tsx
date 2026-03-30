@@ -125,6 +125,7 @@ export default function CartPage() {
 
       if (!response.ok) {
         const message = data?.message || `Request failed with status ${response.status}`
+        console.error("Order API error:", { status: response.status, message, data })
         alert(message)
         return
       }
@@ -136,11 +137,11 @@ export default function CartPage() {
         alert(data?.message || "Failed to place order.")
       }
     } catch (error: any) {
-      console.error(error)
+      console.error("Order submission error:", error)
       if (error.name === 'AbortError') {
         alert("Request timed out. Please check your internet connection and try again.")
       } else {
-        alert(`Error connecting to server (${apiUrl}). Message: ${error.message}`)
+        alert(`Error placing order: ${error.message || 'Unknown error'}. Please try again.`)
       }
     } finally {
       clearTimeout(timeoutId)

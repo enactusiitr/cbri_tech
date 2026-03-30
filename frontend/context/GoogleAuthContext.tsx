@@ -10,6 +10,7 @@ export interface UserProfile {
 
 interface GoogleAuthContextType {
   user: UserProfile | null
+  isAuthReady: boolean
   login: (credential: string) => void
   logout: () => void
 }
@@ -26,6 +27,7 @@ export const useGoogleAuth = () => {
 
 export const GoogleAuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null)
+  const [isAuthReady, setIsAuthReady] = useState(false)
 
   useEffect(() => {
     // Load from localStorage on mount
@@ -37,6 +39,7 @@ export const GoogleAuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("google_auth_session")
       }
     }
+    setIsAuthReady(true)
   }, [])
 
   const decodeJwt = (token: string): any => {
@@ -83,7 +86,7 @@ export const GoogleAuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <GoogleAuthContext.Provider value={{ user, login, logout }}>
+    <GoogleAuthContext.Provider value={{ user, isAuthReady, login, logout }}>
       {children}
     </GoogleAuthContext.Provider>
   )

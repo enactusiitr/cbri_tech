@@ -43,6 +43,8 @@ app.post('/api/orders', async (req, res) => {
   try {
     const customer = req.body?.customer ?? {};
     const name = req.body?.name ?? customer?.name;
+    const userName = req.body?.userName ?? customer?.userName ?? name;
+    const userEmail = req.body?.userEmail ?? customer?.email ?? '';
     const phoneNumber = req.body?.phoneNumber ?? customer?.phoneNumber;
     const address = req.body?.address ?? customer?.address;
     const canteen = req.body?.canteen ?? customer?.canteen;
@@ -99,6 +101,8 @@ app.post('/api/orders', async (req, res) => {
     // Save normalized order to MongoDB
     const newOrder = new Order({
       name: String(name).trim(),
+      userName: String(userName || '').trim(),
+      userEmail: String(userEmail || '').trim().toLowerCase(),
       phoneNumber: String(phoneNumber).trim(),
       address: String(address).trim(),
       canteen: canteen || 'cbri inside',
@@ -120,15 +124,22 @@ app.post('/api/orders', async (req, res) => {
 // 2. ANDROID APP: Get all pending/active orders on startup
 app.get('/api/orders', async (req, res) => {
   try {
-    const { canteen } = req.query;
-    // Only return orders that are 'pending' or 'accepted' to keep the app clean
+    const { canteen, userEmail } = req.query;
+
+    if (userEmail) {
+      const normalizedEmail = String(userEmail).trim().toLowerCase();
+      const orders = await Order.find({ userEmail: normalizedEmail }).sort({ createdAt: -1 });
+      return res.json({ success: true, orders });
+    }
+
+    // Keep Android app behavior unchanged: only active orders as a raw array.
     const query = { status: { $in: ['pending', 'accepted'] } };
     if (canteen) {
       query.canteen = canteen;
     }
-    
+
     const orders = await Order.find(query).sort({ createdAt: -1 });
-    res.json(orders);
+    return res.json(orders);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

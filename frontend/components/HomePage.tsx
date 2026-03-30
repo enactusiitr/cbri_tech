@@ -12,6 +12,7 @@ import { HeroSection } from "@/components/home/hero-section"
 import { menuInside } from "@/data/menuInside"
 import { menuOutside } from "@/data/menuOutside"
 import type { MenuItemData } from "@/data/menuInside"
+import { getStoreClosedMessage, getStoreTimingLabel, isStoreOpen } from "@/lib/store-hours"
 
 interface HomePageProps {
   store: StoreId
@@ -21,6 +22,7 @@ export function HomePage({ store }: HomePageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({})
+  const [now, setNow] = useState(() => new Date())
   const storePath = useStorePath()
   
   const { items, addItem, updateQuantity, removeItem, getTotal, getItemCount } = useCart()
@@ -61,9 +63,15 @@ export function HomePage({ store }: HomePageProps) {
 
   const cartTotal = getTotal()
   const cartItemCount = getItemCount()
+  const isOpenNow = isStoreOpen(store, now)
 
   const categoryScrollRef = useRef<HTMLDivElement>(null)
   const isClickScrolling = useRef(false)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   // Auto-scroll the active chip into view within the filter bar
   const scrollToActiveChip = useCallback((catId: string) => {
@@ -136,6 +144,30 @@ export function HomePage({ store }: HomePageProps) {
       observer.disconnect()
     }
   }, [groupedItems, searchQuery, scrollToActiveChip])
+
+  if (!isOpenNow) {
+    return (
+      <div className="min-h-screen bg-background pb-28">
+        <Header />
+        <main className="max-w-lg mx-auto px-4 py-8">
+          <div className="bg-card border-2 border-foreground rounded-2xl poster-shadow p-6 text-center">
+            <h1 className="text-2xl sm:text-3xl font-black text-poster">Shop is closed</h1>
+            <p className="text-muted-foreground font-semibold mt-2">{getStoreClosedMessage(store)}</p>
+            <p className="text-sm font-bold mt-4">Opening timings: {getStoreTimingLabel(store)}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              CBRI Inside: {getStoreTimingLabel("inside")} | CBRI Outside: {getStoreTimingLabel("outside")}
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl border-2 border-foreground bg-primary text-primary-foreground font-bold"
+            >
+              Go to Store Selection
+            </Link>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background pb-28">
