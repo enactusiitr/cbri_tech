@@ -9,14 +9,14 @@ export const menuOutsideCategories = [
 
 export const menuOutside: MenuItemData[] = [
   // --- FRESH N LIME ---
-  {
-    id: "out-shikanji", name: "Shikanji", description: "Zesty lemon refresher",
-    price: 40, image: "/images/menu/food-items/shikanji.webp", category: "Fresh N Lime", tags: ["Popular"], popular: true,
-  },
-  {
-    id: "out-lemon-ice-tea", name: "Lemon Ice Tea", description: "Chilled lemon iced tea",
-    price: 50, image: "/images/menu/food-items/lemon-ice-tea.webp", category: "Fresh N Lime", tags: [],
-  },
+  // {
+  //   id: "out-shikanji", name: "Shikanji", description: "Zesty lemon refresher",
+  //   price: 40, image: "/images/menu/food-items/shikanji.webp", category: "Fresh N Lime", tags: ["Popular"], popular: true,
+  // },
+  // {
+  //   id: "out-lemon-ice-tea", name: "Lemon Ice Tea", description: "Chilled lemon iced tea",
+  //   price: 50, image: "/images/menu/food-items/lemon-ice-tea.webp", category: "Fresh N Lime", tags: [],
+  // },
   {
     id: "out-fresh-mint-lime-soda", name: "Fresh Mint Lime Soda", description: "Mint infused sparkling limeade",
     price: 50, image: "/images/menu/food-items/lime-soda.webp", category: "Fresh N Lime", tags: [],
@@ -25,22 +25,22 @@ export const menuOutside: MenuItemData[] = [
     id: "out-mojito", name: "Mojito", description: "Classic mint lime cooler",
     price: 60, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: [],
   },
-  {
-    id: "out-apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
-    price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: [],
-  },
-  {
-    id: "out-pineapple-mojito", name: "Pineapple Mojito", description: "Tropical pineapple mint cooler",
-    price: 70, image: "/images/menu/food-items/pineapple-mojito.webp", category: "Fresh N Lime", tags: [],
-  },
-  {
-    id: "out-watermelon-mojito", name: "Watermelon Mojito", description: "Fresh watermelon mint cooler",
-    price: 70, image: "/images/menu/food-items/watermelon-mojito.webp", category: "Fresh N Lime", tags: [],
-  },
-  {
-    id: "out-butterfly-purple-mojito", name: "Butterfly Purple Mojito", description: "Vibrant butterfly pea flower cooler",
-    price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: ["Popular"], popular: true,
-  },
+  // {
+  //   id: "out-apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
+  //   price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: [],
+  // },
+  // {
+  //   id: "out-pineapple-mojito", name: "Pineapple Mojito", description: "Tropical pineapple mint cooler",
+  //   price: 70, image: "/images/menu/food-items/pineapple-mojito.webp", category: "Fresh N Lime", tags: [],
+  // },
+  // {
+  //   id: "out-watermelon-mojito", name: "Watermelon Mojito", description: "Fresh watermelon mint cooler",
+  //   price: 70, image: "/images/menu/food-items/watermelon-mojito.webp", category: "Fresh N Lime", tags: [],
+  // },
+  // {
+  //   id: "out-butterfly-purple-mojito", name: "Butterfly Purple Mojito", description: "Vibrant butterfly pea flower cooler",
+  //   price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: ["Popular"], popular: true,
+  // },
 
   // --- TREATS ---
   {
@@ -64,69 +64,69 @@ export const menuOutside: MenuItemData[] = [
     id: "out-peanut-chat", name: "Peanut Chat", description: "Spiced peanut street snack",
     price: 60, image: "/images/menu/food-items/peanut-chat.webp", category: "Treats", tags: [],
   },
-  {
-    id: "out-dahi-ke-shole", name: "Dahi ke Shole", description: "Spiced chickpeas with yogurt",
-    price: 60, prices: [{ label: "Half", price: 60 }, { label: "Full", price: 100 }],
-    image: "/images/menu/food-items/brownie-shake.webp", category: "Treats", tags: [],
-  },
-  {
-    id: "out-steamed-momos", name: "Steamed Momos", description: "Vegetable stuffing steamed momos",
-    price: 40, prices: [{ label: "6 pcs", price: 40 }, { label: "12 pcs", price: 70 }],
-    image: "/images/menu/food-items/kurkure-momos.webp", category: "Treats", tags: ["Spicy", "Popular"], popular: true,
-  },
-  {
-    id: "out-kurkure-momos", name: "Kurkure Momos", description: "6 pcs crispy outer layer momos",
-    price: 90, image: "/images/menu/food-items/kurkure-momos.webp", category: "Treats", tags: ["Spicy"],
-  },
+  // {
+  //   id: "out-dahi-ke-shole", name: "Dahi ke Shole", description: "Spiced chickpeas with yogurt",
+  //   price: 60, prices: [{ label: "Half", price: 60 }, { label: "Full", price: 100 }],
+  //   image: "/images/menu/food-items/brownie-shake.webp", category: "Treats", tags: [],
+  // },
+  // {
+  //   id: "out-steamed-momos", name: "Steamed Momos", description: "Vegetable stuffing steamed momos",
+  //   price: 40, prices: [{ label: "6 pcs", price: 40 }, { label: "12 pcs", price: 70 }],
+  //   image: "/images/menu/food-items/kurkure-momos.webp", category: "Treats", tags: ["Spicy", "Popular"], popular: true,
+  // },
+  // {
+  //   id: "out-kurkure-momos", name: "Kurkure Momos", description: "6 pcs crispy outer layer momos",
+  //   price: 90, image: "/images/menu/food-items/kurkure-momos.webp", category: "Treats", tags: ["Spicy"],
+  // },
 
   // --- LASSI N SHAKES ---
   {
     id: "out-lassi", name: "Lassi", description: "Sweet cultured buttermilk",
     price: 45, image: "/images/menu/food-items/lassi.webp", category: "Lassi N Shakes", tags: [],
   },
-  {
-    id: "out-mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
-    price: 55, image: "/images/menu/food-items/mangolassi.webp", category: "Lassi N Shakes", tags: ["Popular"], popular: true,
-  },
+  // {
+  //   id: "out-mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
+  //   price: 55, image: "/images/menu/food-items/mangolassi.webp", category: "Lassi N Shakes", tags: ["Popular"], popular: true,
+  // },
   {
     id: "out-cold-coffee", name: "Cold Coffee", description: "Creamy iced coffee",
     price: 70, prices: [{ label: "Regular", price: 70 }, { label: "With Ice Cream", price: 95 }],
     image: "/images/menu/food-items/cold-coffee-1.jpg.webp", category: "Lassi N Shakes", tags: [],
   },
-  {
-    id: "out-oreo-shake", name: "Oreo Shake", description: "Thick Oreo cookie milkshake",
-    price: 90, image: "/images/menu/food-items/oreo-shake.webp", category: "Lassi N Shakes", tags: ["Popular"], popular: true,
-  },
-  {
-    id: "out-pan-shake", name: "Pan Shake", description: "Unique pan-flavoured shake",
-    price: 100, image: "/images/menu/food-items/pan-shake.webp", category: "Lassi N Shakes", tags: [],
-  },
-  {
-    id: "out-brownie-shake", name: "Brownie Shake", description: "Rich brownie blended milkshake",
-    price: 120, image: "/images/menu/food-items/brownie-shake.webp", category: "Lassi N Shakes", tags: [],
-  },
-  {
-    id: "out-protein-rich-shake", name: "Protein Rich Shake", description: "Power-packed protein milkshake",
-    price: 120, image: "/images/menu/food-items/protein-rich-shake.webp", category: "Lassi N Shakes", tags: [],
-  },
+  // {
+  //   id: "out-oreo-shake", name: "Oreo Shake", description: "Thick Oreo cookie milkshake",
+  //   price: 90, image: "/images/menu/food-items/oreo-shake.webp", category: "Lassi N Shakes", tags: ["Popular"], popular: true,
+  // },
+  // {
+  //   id: "out-pan-shake", name: "Pan Shake", description: "Unique pan-flavoured shake",
+  //   price: 100, image: "/images/menu/food-items/pan-shake.webp", category: "Lassi N Shakes", tags: [],
+  // },
+  // {
+  //   id: "out-brownie-shake", name: "Brownie Shake", description: "Rich brownie blended milkshake",
+  //   price: 120, image: "/images/menu/food-items/brownie-shake.webp", category: "Lassi N Shakes", tags: [],
+  // },
+  // {
+  //   id: "out-protein-rich-shake", name: "Protein Rich Shake", description: "Power-packed protein milkshake",
+  //   price: 120, image: "/images/menu/food-items/protein-rich-shake.webp", category: "Lassi N Shakes", tags: [],
+  // },
 
   // --- DESSERTS ---
   {
     id: "out-hot-coffee", name: "Hot Coffee", description: "Hot brewed coffee",
-    price: 20, image: "/images/menu/food-items/hot-coffee.webp", category: "Desserts", tags: [],
+    price: 25, image: "/images/menu/food-items/hot-coffee.webp", category: "Desserts", tags: [],
   },
-  {
-    id: "out-brownie-shot", name: "Brownie Shot", description: "Mini brownie indulgence",
-    price: 50, image: "/images/menu/food-items/brownie-shot.webp", category: "Desserts", tags: [],
-  },
-  {
-    id: "out-walnut-brownie", name: "Walnut Brownie", description: "Rich chocolate walnut brownie",
-    price: 70, image: "/images/menu/food-items/walnut-brownie.webp", category: "Desserts", tags: ["Popular"], popular: true,
-  },
-  {
-    id: "out-brownie-ice-cream", name: "Brownie with Ice Cream", description: "Warm brownie topped with ice cream",
-    price: 120, image: "/images/menu/food-items/brownie-with-ice-cream.webp", category: "Desserts", tags: [],
-  },
+  // {
+  //   id: "out-brownie-shot", name: "Brownie Shot", description: "Mini brownie indulgence",
+  //   price: 50, image: "/images/menu/food-items/brownie-shot.webp", category: "Desserts", tags: [],
+  // },
+  // {
+  //   id: "out-walnut-brownie", name: "Walnut Brownie", description: "Rich chocolate walnut brownie",
+  //   price: 70, image: "/images/menu/food-items/walnut-brownie.webp", category: "Desserts", tags: ["Popular"], popular: true,
+  // },
+  // {
+  //   id: "out-brownie-ice-cream", name: "Brownie with Ice Cream", description: "Warm brownie topped with ice cream",
+  //   price: 120, image: "/images/menu/food-items/brownie-with-ice-cream.webp", category: "Desserts", tags: [],
+  // },
 
   // --- SANDWICHES ---
   {
@@ -149,10 +149,10 @@ export const menuOutside: MenuItemData[] = [
     id: "out-pizza-pasta-sandwich", name: "Pizza Pasta Sandwich", description: "Fusion pizza-pasta stuffed sandwich",
     price: 210, image: "/images/menu/food-items/pizza-pasta-sandwich.webp", category: "Sandwiches", tags: [],
   },
-  {
-    id: "out-mumbaiya-sandwich", name: "Mumbaiya Sandwich", description: "Mumbai-style loaded sandwich",
-    price: 180, image: "/images/menu/food-items/mumbaiya-sandwich.webp", category: "Sandwiches", tags: ["Spicy"],
-  },
+  // {
+  //   id: "out-mumbaiya-sandwich", name: "Mumbaiya Sandwich", description: "Mumbai-style loaded sandwich",
+  //   price: 180, image: "/images/menu/food-items/mumbaiya-sandwich.webp", category: "Sandwiches", tags: ["Spicy"],
+  // },
 
   // --- PIZZA ---
   {

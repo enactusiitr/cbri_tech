@@ -20,37 +20,37 @@ export const menuInside: MenuItemData[] = [
   // --- DRINKS ---
   {
     id: "tea", name: "Tea", description: "Hot freshly brewed tea",
-    price: 12, prices: [{ label: "Half", price: 12 }, { label: "Full", price: 20 }],
+    price: 15, prices: [{ label: "Half", price: 15 }, { label: "Full", price: 25 }],
     image: "/images/menu/food-items/lemon-ice-tea.webp", category: "Drinks", tags: ["Popular"], popular: true,
   },
   {
     id: "coffee", name: "Coffee", description: "Hot brewed coffee",
     price: 20, image: "/images/menu/food-items/cup-of-creamy-coffee.webp", category: "Drinks", tags: [],
   },
-  {
-    id: "cold-coffee", name: "Cold Coffee", description: "Creamy iced coffee",
-    price: 50, image: "/images/menu/food-items/cold-coffee-1.jpg.webp", category: "Drinks", tags: [],
-  },
+  // {
+  //   id: "cold-coffee", name: "Cold Coffee", description: "Creamy iced coffee",
+  //   price: 50, image: "/images/menu/food-items/cold-coffee-1.jpg.webp", category: "Drinks", tags: [],
+  // },
   {
     id: "lassi", name: "Lassi", description: "Sweet cultured buttermilk",
     price: 45, image: "/images/menu/food-items/lassi.webp", category: "Drinks", tags: ["Healthy"],
   },
-  {
-    id: "mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
-    price: 55, image: "/images/menu/food-items/mangolassi.webp", category: "Drinks", tags: ["Popular"], popular: true,
-  },
+  // {
+  //   id: "mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
+  //   price: 55, image: "/images/menu/food-items/mangolassi.webp", category: "Drinks", tags: ["Popular"], popular: true,
+  // },
   {
     id: "chach", name: "Chach", description: "Spiced Indian buttermilk",
     price: 15, image: "/images/menu/food-items/chach.webp", category: "Drinks", tags: [],
   },
-  {
-    id: "fresh-mint-lime-soda", name: "Fresh Mint Lime Soda", description: "Mint infused sparkling limeade",
-    price: 50, image: "/images/menu/food-items/lime-soda.webp", category: "Drinks", tags: [],
-  },
-  {
-    id: "apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
-    price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Drinks", tags: [],
-  },
+  // {
+  //   id: "fresh-mint-lime-soda", name: "Fresh Mint Lime Soda", description: "Mint infused sparkling limeade",
+  //   price: 50, image: "/images/menu/food-items/lime-soda.webp", category: "Drinks", tags: [],
+  // },
+  // {
+  //   id: "apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
+  //   price: 70, image: "/images/menu/food-items/apple-mojito.webp", category: "Drinks", tags: [],
+  // },
 
   // --- BURGER ---
   {
@@ -80,24 +80,24 @@ export const menuInside: MenuItemData[] = [
     id: "bun-maska", name: "Bun Maska", description: "Classic soft bun with butter",
     price: 30, image: "/images/menu/garlic-bread.webp", category: "Snacks & Pizza", tags: [],
   },
-  {
-    id: "momos", name: "Momos", description: "Vegetable Stuffing steamed momos",
-    price: 30, prices: [{ label: "5 pcs", price: 30 }, { label: "10 pcs", price: 60 }],
-    image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy", "Popular"], popular: true,
-  },
-  {
-    id: "kurkure-momos", name: "Kurkure Momos", description: "Crispy outer layer momos",
-    price: 50, prices: [{ label: "5 pcs", price: 50 }, { label: "10 pcs", price: 90 }],
-    image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy"],
-  },
-  {
-    id: "veg-pizza", name: "Veg Pizza", description: "Classic vegetable loaded pizza",
-    price: 90, image: "/images/menu/food-items/veg-pizza.webp", category: "Snacks & Pizza", tags: [],
-  },
-  {
-    id: "cheese-pizza", name: "Cheese Pizza", description: "Oozing melted cheese pizza",
-    price: 150, image: "/images/menu/food-items/cheese-pizza.webp", category: "Snacks & Pizza", tags: ["Popular"], popular: true,
-  },
+  // {
+  //   id: "momos", name: "Momos", description: "Vegetable Stuffing steamed momos",
+  //   price: 30, prices: [{ label: "5 pcs", price: 30 }, { label: "10 pcs", price: 60 }],
+  //   image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy", "Popular"], popular: true,
+  // },
+  // {
+  //   id: "kurkure-momos", name: "Kurkure Momos", description: "Crispy outer layer momos",
+  //   price: 50, prices: [{ label: "5 pcs", price: 50 }, { label: "10 pcs", price: 90 }],
+  //   image: "/images/menu/food-items/kurkure-momos.webp", category: "Snacks & Pizza", tags: ["Spicy"],
+  // },
+  // {
+  //   id: "veg-pizza", name: "Veg Pizza", description: "Classic vegetable loaded pizza",
+  //   price: 90, image: "/images/menu/food-items/veg-pizza.webp", category: "Snacks & Pizza", tags: [],
+  // },
+  // {
+  //   id: "cheese-pizza", name: "Cheese Pizza", description: "Oozing melted cheese pizza",
+  //   price: 150, image: "/images/menu/food-items/cheese-pizza.webp", category: "Snacks & Pizza", tags: ["Popular"], popular: true,
+  // },
 
   // --- MAGGI ---
   {
@@ -174,14 +174,14 @@ export const menuInside: MenuItemData[] = [
     id: "pyaz-paratha", name: "Pyaz Paratha", description: "Onion stuffed flatbread",
     price: 45, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
   },
-  {
-    id: "gobi-paratha", name: "Gobi Paratha", description: "Cauliflower stuffed flatbread",
-    price: 45, image: "/images/menu/food-items/gobi-paratha.webp", category: "Paratha", tags: [],
-  },
-  {
-    id: "gobi-pyaz-paratha", name: "Gobi Pyaz Paratha", description: "Cauliflower & onion flatbread",
-    price: 45, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
-  },
+  // {
+  //   id: "gobi-paratha", name: "Gobi Paratha", description: "Cauliflower stuffed flatbread",
+  //   price: 45, image: "/images/menu/food-items/gobi-paratha.webp", category: "Paratha", tags: [],
+  // },
+  // {
+  //   id: "gobi-pyaz-paratha", name: "Gobi Pyaz Paratha", description: "Cauliflower & onion flatbread",
+  //   price: 45, image: "/images/menu/food-items/aloo-pyaz-paratha.webp", category: "Paratha", tags: [],
+  // },
   {
     id: "plain-paratha", name: "Plain Paratha", description: "Classic layered flatbread",
     price: 25, image: "/images/menu/food-items/aloo-paratha.webp", category: "Paratha", tags: [],
