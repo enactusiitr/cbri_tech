@@ -19,11 +19,11 @@ export const menuOutside: MenuItemData[] = [
   // },
   {
     id: "out-fresh-mint-lime-soda", name: "Fresh Mint Lime Soda", description: "Mint infused sparkling limeade",
-    price: 50, image: "/images/menu/food-items/lime-soda.webp", category: "Fresh N Lime", tags: [],
+    price: 55, image: "/images/menu/food-items/lime-soda.webp", category: "Fresh N Lime", tags: [],
   },
   {
     id: "out-mojito", name: "Mojito", description: "Classic mint lime cooler",
-    price: 60, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: [],
+    price: 65, image: "/images/menu/food-items/apple-mojito.webp", category: "Fresh N Lime", tags: [],
   },
   // {
   //   id: "out-apple-mojito", name: "Apple Mojito", description: "Refreshing apple-infused mint cooler",
@@ -82,7 +82,7 @@ export const menuOutside: MenuItemData[] = [
   // --- LASSI N SHAKES ---
   {
     id: "out-lassi", name: "Lassi", description: "Sweet cultured buttermilk",
-    price: 45, image: "/images/menu/food-items/lassi.webp", category: "Lassi N Shakes", tags: [],
+    price: 50, image: "/images/menu/food-items/lassi.webp", category: "Lassi N Shakes", tags: [],
   },
   // {
   //   id: "out-mango-lassi", name: "Mango Lassi (Seasonal)", description: "Rich mango infused lassi",
@@ -90,7 +90,7 @@ export const menuOutside: MenuItemData[] = [
   // },
   {
     id: "out-cold-coffee", name: "Cold Coffee", description: "Creamy iced coffee",
-    price: 70, prices: [{ label: "Regular", price: 70 }, { label: "With Ice Cream", price: 95 }],
+    price: 75, prices: [{ label: "Regular", price: 70 }, { label: "With Ice Cream", price: 95 }],
     image: "/images/menu/food-items/cold-coffee-1.jpg.webp", category: "Lassi N Shakes", tags: [],
   },
   // {

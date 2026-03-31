@@ -7,7 +7,7 @@ type StoreHours = {
 
 const STORE_HOURS: Record<StoreId, StoreHours> = {
   inside: { startHour: 12, endHour: 21 },
-  outside: { startHour: 13, endHour: 23 },
+  outside: { startHour: 14, endHour: 23 },
 }
 
 export function formatHour(hour: number) {
