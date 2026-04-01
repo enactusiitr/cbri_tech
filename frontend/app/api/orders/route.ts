@@ -77,11 +77,22 @@ function parseUpstreamBody(upstreamResponse: UpstreamResponse) {
   }
 }
 
-function getOrdersEndpoint(backendBaseUrl: string) {
+function normalizePath(path: string) {
+  if (!path) return ""
+  const withLeadingSlash = path.startsWith("/") ? path : `/${path}`
+  return withLeadingSlash.replace(/\/+$/, "")
+}
+
+function getOrdersEndpoint(backendBaseUrl: string, apiBasePathRaw?: string) {
   const parsed = new URL(backendBaseUrl)
   const segments = parsed.pathname.split("/").filter(Boolean)
   const lastSegment = segments[segments.length - 1]?.toLowerCase() || ""
   const pathLooksApiScoped = lastSegment === "api" || lastSegment.endsWith("-api")
+
+  const configuredApiBasePath = normalizePath((apiBasePathRaw || "").trim())
+  if (configuredApiBasePath) {
+    return `${backendBaseUrl}${configuredApiBasePath}/orders`
+  }
 
   return pathLooksApiScoped ? `${backendBaseUrl}/orders` : `${backendBaseUrl}/api/orders`
 }
@@ -89,6 +100,7 @@ function getOrdersEndpoint(backendBaseUrl: string) {
 export async function GET(request: NextRequest) {
   try {
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || "").replace(/\/+$/, "")
+    const apiBasePath = process.env.NEXT_PUBLIC_API_BASE_PATH || process.env.API_BASE_PATH || ""
 
     if (!backendBaseUrl) {
       // Return empty orders list if backend not configured
@@ -99,7 +111,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userEmail = request.nextUrl.searchParams.get("userEmail")
-    const ordersEndpoint = getOrdersEndpoint(backendBaseUrl)
+    const ordersEndpoint = getOrdersEndpoint(backendBaseUrl, apiBasePath)
     const upstreamUrl = userEmail
       ? `${ordersEndpoint}?userEmail=${encodeURIComponent(userEmail)}`
       : ordersEndpoint
@@ -127,6 +139,7 @@ export async function POST(request: NextRequest) {
   try {
     const payload = await request.json()
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || "").replace(/\/+$/, "")
+    const apiBasePath = process.env.NEXT_PUBLIC_API_BASE_PATH || process.env.API_BASE_PATH || ""
 
     if (!backendBaseUrl) {
       return NextResponse.json(
@@ -135,7 +148,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const upstreamUrl = getOrdersEndpoint(backendBaseUrl)
+    const upstreamUrl = getOrdersEndpoint(backendBaseUrl, apiBasePath)
 
     const upstreamResponse = await requestUpstream(upstreamUrl, "POST", payload)
     const data = parseUpstreamBody(upstreamResponse)

@@ -151,7 +151,7 @@ export function HomePage({ store }: HomePageProps) {
         <Header />
         <main className="max-w-lg mx-auto px-4 py-8">
           <div className="bg-card border-2 border-foreground rounded-2xl poster-shadow p-6 text-center">
-            <h1 className="text-2xl sm:text-3xl font-black text-poster">Shop is closed</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-poster"></h1>
             <p className="text-muted-foreground font-semibold mt-2">{getStoreClosedMessage(store)}</p>
             <p className="text-sm font-bold mt-4">Opening timings: {getStoreTimingLabel(store)}</p>
             <p className="text-xs text-muted-foreground mt-2">

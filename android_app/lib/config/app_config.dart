@@ -9,11 +9,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class AppConfig {
   AppConfig._(); // Prevent instantiation — pure static utility class
 
+  static String _trimTrailingSlash(String value) =>
+      value.endsWith('/') ? value.substring(0, value.length - 1) : value;
+
+  static String _ensureLeadingSlash(String value) =>
+      value.startsWith('/') ? value : '/$value';
+
   /// The base URL of your Node.js backend.
   /// Reads from the BACKEND_URL key in the .env file.
   /// Falls back to localhost for local development.
   static String get backendUrl =>
-      dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000';
+      _trimTrailingSlash(dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000');
 
   /// Parsed backend URI helper.
   static Uri get backendUri => Uri.parse(backendUrl);
@@ -22,8 +28,23 @@ class AppConfig {
   static String get backendHost => backendUri.host;
 
   /// The REST API base path
-  static String get apiBasePath =>
-      dotenv.env['API_BASE_PATH'] ?? '/api';
+  ///
+  /// Resolution behavior:
+  /// - If API_BASE_PATH is provided, it is used as-is.
+  /// - If backend URL already ends with /api or /<name>-api, use no extra path.
+  /// - Otherwise default to /api.
+  static String get apiBasePath {
+    final configured = (dotenv.env['API_BASE_PATH'] ?? '').trim();
+    if (configured.isNotEmpty) {
+      if (configured == '/') return '';
+      return _ensureLeadingSlash(_trimTrailingSlash(configured));
+    }
+
+    final segments = backendUri.path.split('/').where((s) => s.isNotEmpty).toList();
+    final last = segments.isEmpty ? '' : segments.last.toLowerCase();
+    final pathLooksApiScoped = last == 'api' || last.endsWith('-api');
+    return pathLooksApiScoped ? '' : '/api';
+  }
 
   /// Full base URL for REST API calls (e.g. https://your-backend.com/api)
   static String get apiBaseUrl => '$backendUrl$apiBasePath';

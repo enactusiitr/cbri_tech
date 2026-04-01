@@ -103,7 +103,7 @@ export default function SelectStorePage() {
                       )}
                     </div>
                     <div className={`inline-flex items-center gap-2 text-sm font-bold ${canEnter ? "text-primary" : "text-muted-foreground"}`}>
-                      {canEnter ? "Enter Store" : "Shop is closed"}
+                      {canEnter ? "Enter Store" : "sed"}
                       {canEnter && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />}
                     </div>
                   </div>
